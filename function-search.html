@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>JavaDoc Function Search</title>
+  <title>JavaDoc Search</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <!-- Google Fonts for modern look -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -58,7 +58,7 @@
       letter-spacing: -1px;
       text-align: center;
       margin-top: 8vh;
-      margin-bottom: 18px;
+      margin-bottom: 20px;
       font-family: 'Roboto', Arial, sans-serif;
       user-select: none;
       line-height: 1.1;
@@ -131,8 +131,28 @@
     }
     .results li:last-child { border-bottom: none; }
     .results li.selected,
-    .results li:hover {
+    .results li:hover,
+    .results li:focus-visible {
       background: var(--result-selected);
+    }
+    .results li .result-link {
+      width: 100%;
+      height: 100%;
+      display: block;
+      color: inherit;
+      text-decoration: none;
+      outline: none;
+      position: relative;
+      z-index: 1;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      padding: 0;
+      margin: 0;
+    }
+    .results li .result-link:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
     }
     .no-results-ct {
       display: flex;
@@ -218,11 +238,13 @@
       word-break: break-word;
       white-space: normal;
     }
+    /* HOVERBOX: right side of result instead of below */
     .func-hoverbox {
       display: none;
       position: absolute;
-      left: 16px;
-      top: 100%;
+      left: 100%;
+      top: 0;
+      margin-left: 14px;
       z-index: 10;
       background: #fff;
       color: #222;
@@ -232,12 +254,14 @@
       box-shadow: 0 6px 18px rgba(30,40,90,0.13);
       font-size: .98em;
       min-width: 220px;
-      max-width: 90vw;
-      margin-top: 7px;
+      max-width: 350px;
       pointer-events: none;
       white-space: pre-line;
+      transition: opacity .13s;
     }
-    .results li:hover .func-hoverbox, .results li:focus .func-hoverbox {
+    .results li:hover .func-hoverbox,
+    .results li:focus-within .func-hoverbox,
+    .results li.selected .func-hoverbox {
       display: block;
       pointer-events: auto;
     }
@@ -303,25 +327,15 @@
       transition: color .18s;
     }
     .toggle-mode:hover { color: var(--primary);}
-    /* Beta version bottom center */
-    .beta-footer {
-      position: fixed;
-      left: 85%;
-      bottom: 18px;
-      transform: translateX(-50%);
-      background: #f3f6fd;
-      color: #4285f4;
-      font-size: 1.04em;
-      font-family: 'Roboto', Arial, sans-serif;
-      border-radius: 12px;
-      box-shadow: 0 2px 12px rgba(30,40,60,0.07);
-      padding: 5px 17px 5px 17px;
-      letter-spacing: 0.02em;
-      font-weight: 500;
-      z-index: 99;
-      opacity: 0.86;
-      user-select: none;
-      pointer-events: none;
+    @media (max-width: 950px) {
+      .func-hoverbox {
+        left: auto;
+        right: 0;
+        margin-left: 0;
+        margin-right: -340px;
+        min-width: 180px;
+        max-width: 270px;
+      }
     }
     @media (max-width: 650px) {
       .container, .results, #search-bar, .progress {max-width: 98vw;}
@@ -329,14 +343,22 @@
       .results li {padding: 14px 10px 10px 13px;}
       .func-title {font-size: 1em;}
       .func-class {font-size: .93em;}
-      .func-hoverbox { left: 0; right: 0; }
+      .func-hoverbox {
+        position: static;
+        max-width: 100vw;
+        left: 0;
+        right: 0;
+        margin-left: 0;
+        margin-right: 0;
+        margin-top: 12px;
+        border-radius: 12px;
+      }
     }
     @media (max-width: 400px) {
       .func-details {font-size: .92em;}
       .search-logo {font-size: 1.39em;}
       .toggle-mode {top: 8px; right: 8px;}
       .func-tag {padding: 2.5px 8px 2.5px 8px;}
-      .beta-footer {font-size: .93em;}
     }
     .dark {
       --bg: #181a1b;
@@ -358,7 +380,6 @@
     .dark .func-hoverbox .func-hover-title { color: #fff;}
     .dark .func-hoverbox .func-hover-type { color: #8ab4f8;}
     .dark .func-hoverbox .func-hover-class { color: #8ab4f8;}
-    .dark .beta-footer { background: #27334b; color: #8ab4f8; box-shadow: 0 2px 12px rgba(0,0,0,0.14);}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 </head>
@@ -383,7 +404,6 @@
       <b>Tip:</b> <kbd>↑</kbd>/<kbd>↓</kbd> + <kbd>Enter</kbd> to jump. Press <kbd>Ctrl+R</kbd> to re-index after updating docs.
     </div>
   </div>
-  <div class="beta-footer">beta version v1</div>
   <script>
     const STORAGE_KEY = 'javadoc_func_index_v8';
     const INDEX_URLS_KEY = 'javadoc_func_index_urls_v8';
@@ -486,24 +506,28 @@
         li.className = i===selIdx?'selected':'';
         li.tabIndex = 0;
         li.innerHTML = `
-          <div class="func-tags">${typeTag(type)}</div>
-          <span class="func-title">${hTitle}</span>
-          <div class="func-details">
-            <span>${hSig || ''}</span>
-            <span class="func-class">${hClass||''}</span>
-          </div>
-          <div class="func-hoverbox">
-            <div class="func-hover-title">${title}</div>
-            <div class="func-hover-type">${typeTag(type)} ${type.charAt(0).toUpperCase()+type.slice(1)}</div>
-            ${signature?`<div class="func-hover-syntax">${signature}</div>`:""}
-            ${classname?`<div class="func-hover-class">${classname}</div>`:""}
-            <div style="margin-top:7px;"><a href="${url}" target="_blank" style="color:#4285f4;text-decoration:underline;">Go to documentation</a></div>
-          </div>
+          <a class="result-link" href="${url}" target="_blank" tabindex="0">
+            <div class="func-tags">${typeTag(type)}</div>
+            <span class="func-title">${hTitle}</span>
+            <div class="func-details">
+              <span>${hSig || ''}</span>
+              <span class="func-class">${hClass||''}</span>
+            </div>
+            <div class="func-hoverbox">
+              <div class="func-hover-title">${title}</div>
+              <div class="func-hover-type">${typeTag(type)} ${type.charAt(0).toUpperCase()+type.slice(1)}</div>
+              ${signature?`<div class="func-hover-syntax">${signature}</div>`:""}
+              ${classname?`<div class="func-hover-class">${classname}</div>`:""}
+              <div style="margin-top:7px;"><a href="${url}" target="_blank" style="color:#4285f4;text-decoration:underline;">Go to documentation</a></div>
+            </div>
+          </a>
         `;
-        li.onclick = (e)=>{
-          window.open(url, "_blank", "noopener");
-        };
-        li.onmouseover = ()=>{selIdx=i;updateResults(q);}
+        // Mouseover for hoverbox
+        li.onmouseover = () => { selIdx=i; li.classList.add('selected'); };
+        li.onmouseout = () => { li.classList.remove('selected'); };
+        // Accessibility: focus within
+        li.querySelector('.result-link').onfocus = () => { selIdx = i; li.classList.add('selected'); };
+        li.querySelector('.result-link').onblur = () => { li.classList.remove('selected'); };
         ul.appendChild(li);
       });
     }
