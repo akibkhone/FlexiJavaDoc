@@ -2,190 +2,263 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Flexi Java Doc Global Search</title>
+  <title>JavaDoc Function Search</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <!-- Google Fonts for modern look -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #f9fafb;
-      --fg: #15171a;
-      --fg-subtle: #6b7280;
-      --hl: #e5e7eb;
-      --hl-selected: #e8eefb;
-      --primary: #1676f3;
-      --input-bg: #fff;
-      --border: #e5e7eb;
-      --radius: 9px;
-      --highlight: #fcf46a;
-      --highlight-fg: #252600;
+      --bg: #fff;
+      --fg: #212121;
+      --fg-subtle: #757575;
+      --primary: #4285f4;
+      --input-bg: #f1f3f4;
+      --border: #e0e0e0;
+      --result-bg: #fff;
+      --result-hover: #f8fafc;
+      --result-selected: #e3edfa;
+      --shadow: 0 1px 6px rgba(32,33,36,0.28);
+      --radius: 24px;
+      --highlight: #feefc3;
+      --highlight-fg: #3c4043;
+      --max-width: 600px;
+      --search-height: 56px;
+      --transition: all .18s cubic-bezier(.4,0,.2,1);
     }
+
     body {
-      font-family: 'Inter', system-ui, sans-serif;
       background: var(--bg);
       color: var(--fg);
-      margin: 0; padding: 0;
+      font-family: 'Roboto', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
       min-height: 100vh;
       transition: background .2s, color .2s;
-    }
-    .container {
-      max-width: 560px;
-      margin: 4vh auto;
-      padding: 2.5em 1.2em;
-      background: var(--input-bg);
-      border-radius: var(--radius);
-      box-shadow: 0 4px 32px 0 rgba(30,40,60,0.06);
-      border: 1px solid var(--border);
-      box-sizing: border-box;
-    }
-    h1 {
-      font-weight: 700;
-      font-size: 1.6em;
-      text-align: center;
-      margin: .25em 0 1.3em 0;
-      letter-spacing: -.03em;
-      color: var(--primary);
-    }
-    #search-bar {
-      display: block;
-      width: 100%;
-      font-size: 1.17em;
-      padding: .7em 1em;
-      margin-bottom: 1.2em;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      outline: none;
-      background: var(--hl);
-      color: var(--fg);
-      box-sizing: border-box;
-      transition: border-color .15s;
-    }
-    #search-bar:focus { border-color: var(--primary); }
-    .results {
-      list-style: none; padding: 0; margin: 0;
-      border-radius: var(--radius);
-      overflow: visible;
-      box-shadow: 0 2px 12px 0 rgba(60,70,90,0.07);
-      background: var(--input-bg);
-      border: 1px solid var(--border);
-      min-width: 0;
-      width: 100%;
-      max-width: 100%;
-      word-break: break-word;
-      white-space: normal;
-      box-sizing: border-box;
-    }
-    .results li {
-      padding: .77em 1.1em;
-      cursor: pointer;
-      border-bottom: 1px solid var(--border);
-      background: none;
-      transition: background .13s;
-      position: relative;
-      word-break: break-word;
-      white-space: normal;
-      overflow-wrap: anywhere;
-      max-width: 100%;
-      box-sizing: border-box;
-      min-width: 0;
       display: flex;
       flex-direction: column;
-      z-index: 1;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .search-logo {
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: -1px;
+      text-align: center;
+      margin-top: 8vh;
+      margin-bottom: 18px;
+      font-family: 'Roboto', Arial, sans-serif;
+      user-select: none;
+      line-height: 1.1;
+      text-shadow: 0 2px 8px rgba(60, 100, 255, 0.03);
+    }
+
+    /* Google-like search bar */
+    #search-bar {
+      width: 100%;
+      max-width: 520px;
+      height: var(--search-height);
+      font-size: 1.1rem;
+      padding: 0 52px 0 18px;
+      border-radius: var(--radius);
+      border: 1.5px solid var(--border);
+      background: var(--input-bg);
+      color: var(--fg);
+      box-shadow: var(--shadow);
+      outline: none;
+      transition: border-color .14s;
+      margin-bottom: 18px;
+      box-sizing: border-box;
+    }
+    #search-bar:focus {
+      border-color: var(--primary);
+      background: #fff;
+    }
+    .search-icon {
+      position: absolute;
+      right: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--primary);
+      font-size: 1.4rem;
+      pointer-events: none;
+    }
+
+    .search-bar-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 520px;
+      margin-bottom: 10px;
+    }
+
+    /* Results dropdown */
+    .results {
+      width: 100%;
+      max-width: 520px;
+      background: var(--result-bg);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      transition: var(--transition);
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .results li {
+      display: flex;
+      flex-direction: column;
+      padding: 16px 24px 12px 20px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      transition: background .12s;
+      background: var(--result-bg);
+      word-break: break-word;
+      white-space: normal;
+      font-size: 1.07rem;
+      max-width: 100%;
+      box-sizing: border-box;
     }
     .results li:last-child { border-bottom: none; }
     .results li.selected,
-    .results li:active,
     .results li:hover {
-      background: var(--hl-selected);
-      z-index: 2;
+      background: var(--result-selected);
     }
     .func-title {
-      font-weight: 600;
-      font-size: 1.07em;
+      font-weight: 500;
+      font-size: 1.13em;
       color: var(--fg);
+      margin-bottom: 3px;
+      line-height: 1.3;
       word-break: break-word;
-      white-space: normal;
-      display: block;
-      max-width: 100%;
-      overflow-wrap: anywhere;
     }
     .func-details {
-      font-size: .98em;
+      font-size: .97em;
       color: var(--fg-subtle);
-      margin-top: 2px;
       line-height: 1.5;
-      word-break: break-word;
-      white-space: normal;
+      margin-top: 1px;
       max-width: 100%;
-      overflow-wrap: anywhere;
-      display: block;
+      word-break: break-word;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
     }
     .func-class {
-      float:right;
-      font-size:.95em;
-      color:var(--fg-subtle);
-      margin-left: 10px;
-      max-width:50%;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      display:inline-block;
-      vertical-align:middle;
+      font-size: .95em;
+      color: var(--primary);
+      margin-left: auto;
+      max-width: 60%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 400;
+      flex-shrink: 1;
     }
     mark {
       background: var(--highlight);
       color: var(--highlight-fg);
+      border-radius: 3px;
+      font-weight: 500;
       padding: 0 2px;
-      border-radius: 2px;
-      font-weight: 600;
       word-break: break-word;
       white-space: normal;
-      overflow-wrap: anywhere;
     }
-    .progress { width: 100%; height: 7px; background: var(--hl); margin: 1em 0; border-radius: 4px; overflow: hidden;}
-    .progress-bar { background: var(--primary); height: 100%; width: 0%;}
-    .toggle-mode {
-      float: right; cursor: pointer; font-size: 1.21em; margin-top: -2em; margin-bottom: 1.1em; color: var(--fg-subtle);
-      background: none; border: none;
-      outline:none;
-      transition: color .17s;
+
+    .progress {
+      width: 100%;
+      max-width: 520px;
+      height: 7px;
+      background: var(--input-bg);
+      margin: 20px 0 10px 0;
+      border-radius: 3px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(30,40,60,0.04);
     }
-    .toggle-mode:hover { color: var(--primary);}
-    .msg {
-      margin: 2em 0 0 0;
+    .progress-bar { background: var(--primary); height: 100%; width: 0%; }
+
+    .tip, .msg {
       text-align: center;
       color: var(--fg-subtle);
+      font-size: .97em;
+      margin-top: 10px;
+      margin-bottom: 0;
+      user-select: none;
     }
-    .tip {
-      margin-top:2em;text-align:center;font-size:.96em;color:var(--fg-subtle);
+    .tip {margin-bottom: 36px;}
+    .msg {margin-bottom: 10px;}
+
+    .toggle-mode {
+      position: fixed;
+      right: 24px;
+      top: 22px;
+      background: none;
+      border: none;
+      font-size: 1.4em;
+      color: var(--fg-subtle);
+      cursor: pointer;
+      z-index: 20;
+      transition: color .18s;
     }
-    @media (max-width: 600px) {
-      .container {padding: .7em;}
-      h1 {font-size: 1.27em;}
-      .func-title, .func-details {font-size: 1em;}
-      .func-class {max-width: 100%;}
+    .toggle-mode:hover { color: var(--primary);}
+    /* Responsive Design */
+    @media (max-width: 650px) {
+      .container, .results, #search-bar, .progress {max-width: 98vw;}
+      .search-logo {font-size: 2em;}
+      .results li {padding: 14px 10px 10px 13px;}
+      .func-title {font-size: 1em;}
+      .func-class {font-size: .93em;}
+    }
+    @media (max-width: 400px) {
+      .func-details {font-size: .92em;}
+      .search-logo {font-size: 1.39em;}
+      .toggle-mode {top: 8px; right: 8px;}
     }
     /* Dark mode */
     .dark {
-      --bg: #191b22;
-      --fg: #e2e4e9;
-      --fg-subtle: #99a0b7;
-      --hl: #23263a;
-      --hl-selected: #26293d;
-      --input-bg: #181b21;
-      --border: #222432;
-      --primary: #4ea5ff;
-      --highlight: #f3b94b;
-      --highlight-fg: #44310b;
+      --bg: #181a1b;
+      --fg: #ecedef;
+      --fg-subtle: #a3a6ab;
+      --primary: #8ab4f8;
+      --input-bg: #222326;
+      --border: #35363a;
+      --result-bg: #232325;
+      --result-hover: #232325;
+      --result-selected: #26384c;
+      --highlight: #2d3b53;
+      --highlight-fg: #fffbe5;
+      --shadow: 0 2px 8px rgba(8,12,40,0.23);
     }
-    .dark mark { background: var(--highlight); color: var(--highlight-fg);}
+    .dark mark { background: var(--highlight); color: var(--highlight-fg); }
   </style>
   <!-- Fuzzy Search: Fuse.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 </head>
 <body>
+  <button class="toggle-mode" id="toggle-mode" title="Toggle dark/light">&#9788;</button>
   <div class="container">
-    <button class="toggle-mode" id="toggle-mode" title="Toggle dark/light">&#9788;</button>
-    <h1>Flexi Java Doc Global Search</h1>
-    <input id="search-bar" type="text" autocomplete="off" spellcheck="false" placeholder="Search by function, method, class, or description...">
+    <div class="search-logo">JavaDoc Search</div>
+    <div class="search-bar-wrap">
+      <input id="search-bar" type="text" autocomplete="off" spellcheck="false"
+        placeholder="Search by function, method, class, or description...">
+      <span class="search-icon" aria-hidden="true">
+        <svg height="22" viewBox="0 0 24 24" width="22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="11" cy="11" r="7" stroke="#4285f4" stroke-width="2"/>
+          <path d="M20 20L16.65 16.65" stroke="#4285f4" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </span>
+    </div>
     <div class="progress" id="progress" style="display:none"><div class="progress-bar" id="progress-bar"></div></div>
     <ul class="results" id="results"></ul>
     <div id="msg" class="msg"></div>
@@ -194,9 +267,9 @@
     </div>
   </div>
   <script>
-    // --- Minimalistic Clean AI-powered Fuzzy JavaDoc Search ---
-    const STORAGE_KEY = 'javadoc_func_index_v2';
-    const INDEX_URLS_KEY = 'javadoc_func_index_urls_v2';
+    // --- Google-style JavaDoc Search ---
+    const STORAGE_KEY = 'javadoc_func_index_v3';
+    const INDEX_URLS_KEY = 'javadoc_func_index_urls_v3';
     let index = [], urls = [], results = [], selIdx = -1, fuse = null;
     const $ = id => document.getElementById(id);
 
@@ -262,7 +335,7 @@
       const ul = $('results');
       ul.innerHTML = '';
       results.forEach((res,i)=>{
-        let {title,signature,classname,description,url} = res.item;
+        let {title,signature,classname,url} = res.item;
         // Highlight
         let matches = res.matches||[];
         let hTitle = title, hSig = signature, hClass = classname;
@@ -274,10 +347,9 @@
         let li=document.createElement('li');
         li.className = i===selIdx?'selected':'';
         li.tabIndex = 0;
-        // For class name, use a span with class for ellipsis
         li.innerHTML = `<span class="func-title">${hTitle}</span>
         <div class="func-details">
-          ${hSig || ''}
+          <span>${hSig || ''}</span>
           <span class="func-class">${hClass||''}</span>
         </div>`;
         li.onclick = (e)=>{ e.preventDefault(); window.open(url, "_blank", "noopener"); };
@@ -327,34 +399,38 @@
         let bc = doc.querySelector('.header .subTitle')||doc.querySelector('.header .title')||doc.querySelector('title');
         if(bc) cls = bc.textContent.trim();
         // Description: find <div class="block"> after <pre>
-        let desc = '';
-        let block = pre && pre.nextElementSibling && pre.nextElementSibling.classList.contains('block')
-          ? pre.nextElementSibling : null;
-        if(block) desc = block.textContent.trim();
+        // let desc = '';
+        // let block = pre && pre.nextElementSibling && pre.nextElementSibling.classList.contains('block')
+        //   ? pre.nextElementSibling : null;
+        // if(block) desc = block.textContent.trim();
         // Anchor
         let anchor = h4.getAttribute('id') || h4.previousElementSibling?.getAttribute('name');
         let url = file+(anchor?('#'+anchor):'');
         // Skip class h4
         if(title.match(/^[A-Z][A-Za-z0-9_]*$/)) return;
-        index.push({title, signature, classname:cls, description:desc, url});
+        index.push({title, signature, classname:cls, url});
       });
     }
 
-    // --- Find all HTML files in this directory and subdirs ---
+    // --- Find all HTML files using allclasses-noframe.html for completeness ---
     async function findAllHtmlFiles() {
-      if(window.location.protocol==="file:") {
-        $('msg').innerHTML = "<b>Please use this in a web server (localhost)!</b><br>Local file access cannot enumerate files.";
-        return [];
-      }
-      // Try manifest
+      // Use allclasses-noframe.html to find all class HTML files
       try {
-        let resp = await fetch('index-files/files.json');
-        if(resp.ok) {
-          let arr = await resp.json();
-          return arr.filter(x=>x.endsWith('.html'));
+        let resp = await fetch('allclasses-noframe.html');
+        if (resp.ok) {
+          let html = await resp.text();
+          let parser = new DOMParser();
+          let doc = parser.parseFromString(html, "text/html");
+          let links = [...doc.querySelectorAll('a[href$=".html"]')];
+          let files = Array.from(new Set(links.map(a => a.getAttribute('href'))));
+          // Remove fragment part if present, and resolve paths if necessary
+          files = files.map(f => f.replace(/#.*$/, ''));
+          // Remove duplicates and empty
+          files = files.filter(f => f && f.endsWith('.html'));
+          return files;
         }
-      }catch{}
-      // Guess
+      } catch (e) {}
+      // Fallback: previous guessing logic
       let files = [];
       files.push('index.html');
       for(let i=0;i<100;i++) files.push('index-files/index-'+i+'.html');
