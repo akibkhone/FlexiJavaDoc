@@ -39,6 +39,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      position: relative;
+      min-height: 100vh;
     }
     .container {
       width: 100%;
@@ -131,6 +133,22 @@
     .results li.selected,
     .results li:hover {
       background: var(--result-selected);
+    }
+    .no-results-ct {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100px;
+      height: 140px;
+    }
+    .no-results-msg {
+      color: var(--fg-subtle);
+      font-size: 1.05rem;
+      text-align: center;
+      margin: 0 auto;
+      width: 100%;
+      letter-spacing: 0.01em;
+      font-weight: 500;
     }
     .func-title {
       font-weight: 500;
@@ -285,6 +303,26 @@
       transition: color .18s;
     }
     .toggle-mode:hover { color: var(--primary);}
+    /* Beta version bottom center */
+    .beta-footer {
+      position: fixed;
+      left: 85%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      background: #f3f6fd;
+      color: #4285f4;
+      font-size: 1.04em;
+      font-family: 'Roboto', Arial, sans-serif;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(30,40,60,0.07);
+      padding: 5px 17px 5px 17px;
+      letter-spacing: 0.02em;
+      font-weight: 500;
+      z-index: 99;
+      opacity: 0.86;
+      user-select: none;
+      pointer-events: none;
+    }
     @media (max-width: 650px) {
       .container, .results, #search-bar, .progress {max-width: 98vw;}
       .search-logo {font-size: 2em;}
@@ -298,6 +336,7 @@
       .search-logo {font-size: 1.39em;}
       .toggle-mode {top: 8px; right: 8px;}
       .func-tag {padding: 2.5px 8px 2.5px 8px;}
+      .beta-footer {font-size: .93em;}
     }
     .dark {
       --bg: #181a1b;
@@ -319,6 +358,7 @@
     .dark .func-hoverbox .func-hover-title { color: #fff;}
     .dark .func-hoverbox .func-hover-type { color: #8ab4f8;}
     .dark .func-hoverbox .func-hover-class { color: #8ab4f8;}
+    .dark .beta-footer { background: #27334b; color: #8ab4f8; box-shadow: 0 2px 12px rgba(0,0,0,0.14);}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 </head>
@@ -328,7 +368,7 @@
     <div class="search-logo">JavaDoc Search</div>
     <div class="search-bar-wrap">
       <input id="search-bar" type="text" autocomplete="off" spellcheck="false"
-        placeholder="Search by function, method, class, or description...">
+        placeholder="Try: removeRow, getList, isVisible, ...">
       <span class="search-icon" aria-hidden="true">
         <svg height="22" viewBox="0 0 24 24" width="22" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="11" cy="11" r="7" stroke="#4285f4" stroke-width="2"/>
@@ -343,6 +383,7 @@
       <b>Tip:</b> <kbd>↑</kbd>/<kbd>↓</kbd> + <kbd>Enter</kbd> to jump. Press <kbd>Ctrl+R</kbd> to re-index after updating docs.
     </div>
   </div>
+  <div class="beta-footer">beta version v1</div>
   <script>
     const STORAGE_KEY = 'javadoc_func_index_v8';
     const INDEX_URLS_KEY = 'javadoc_func_index_urls_v8';
@@ -427,6 +468,10 @@
     function updateResults(q='') {
       const ul = $('results');
       ul.innerHTML = '';
+      if (!results.length) {
+        ul.innerHTML = `<li class="no-results-ct"><div class="no-results-msg">No results</div></li>`;
+        return;
+      }
       results.forEach((res,i)=>{
         let {title,signature,classname,url} = res.item;
         let matches = res.matches||[];
@@ -461,7 +506,6 @@
         li.onmouseover = ()=>{selIdx=i;updateResults(q);}
         ul.appendChild(li);
       });
-      if(!results.length) ul.innerHTML = '<li style="color:var(--fg-subtle);padding:.9em;text-align:center;">No results</li>';
     }
 
     // --- Index Building ---
