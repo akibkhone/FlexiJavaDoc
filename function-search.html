@@ -24,8 +24,10 @@
       --max-width: 600px;
       --search-height: 56px;
       --transition: all .18s cubic-bezier(.4,0,.2,1);
+      --tag-function: #34a853;
+      --tag-field: #fbbc04;
+      --tag-class: #1a73e8;
     }
-
     body {
       background: var(--bg);
       color: var(--fg);
@@ -38,7 +40,6 @@
       flex-direction: column;
       align-items: center;
     }
-
     .container {
       width: 100%;
       max-width: var(--max-width);
@@ -48,7 +49,6 @@
       flex-direction: column;
       align-items: center;
     }
-
     .search-logo {
       font-size: 2.4rem;
       font-weight: 700;
@@ -62,8 +62,6 @@
       line-height: 1.1;
       text-shadow: 0 2px 8px rgba(60, 100, 255, 0.03);
     }
-
-    /* Google-like search bar */
     #search-bar {
       width: 100%;
       max-width: 520px;
@@ -93,15 +91,12 @@
       font-size: 1.4rem;
       pointer-events: none;
     }
-
     .search-bar-wrap {
       position: relative;
       width: 100%;
       max-width: 520px;
       margin-bottom: 10px;
     }
-
-    /* Results dropdown */
     .results {
       width: 100%;
       max-width: 520px;
@@ -129,6 +124,8 @@
       font-size: 1.07rem;
       max-width: 100%;
       box-sizing: border-box;
+      position: relative;
+      min-height: 64px;
     }
     .results li:last-child { border-bottom: none; }
     .results li.selected,
@@ -142,6 +139,9 @@
       margin-bottom: 3px;
       line-height: 1.3;
       word-break: break-word;
+      display: inline-block;
+      vertical-align: middle;
+      max-width: 80%;
     }
     .func-details {
       font-size: .97em;
@@ -166,6 +166,31 @@
       font-weight: 400;
       flex-shrink: 1;
     }
+    .func-tags {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 2.5px;
+      margin-right: 8px;
+    }
+    .func-tag {
+      display: inline-block;
+      font-size: 0.97em;
+      font-weight: 500;
+      color: #fff;
+      background: var(--primary);
+      border-radius: 7px;
+      padding: 3.5px 13px 3.5px 13px;
+      margin-right: 9px;
+      margin-bottom: 2px;
+      text-transform: capitalize;
+      box-shadow: 0 1px 2px rgba(32,33,36,0.08);
+      letter-spacing: .02em;
+      vertical-align: middle;
+    }
+    .tag-function { background: var(--tag-function);}
+    .tag-field { background: var(--tag-field); color: #222;}
+    .tag-class { background: var(--tag-class);}
     mark {
       background: var(--highlight);
       color: var(--highlight-fg);
@@ -175,7 +200,57 @@
       word-break: break-word;
       white-space: normal;
     }
-
+    .func-hoverbox {
+      display: none;
+      position: absolute;
+      left: 16px;
+      top: 100%;
+      z-index: 10;
+      background: #fff;
+      color: #222;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 12px 16px;
+      box-shadow: 0 6px 18px rgba(30,40,90,0.13);
+      font-size: .98em;
+      min-width: 220px;
+      max-width: 90vw;
+      margin-top: 7px;
+      pointer-events: none;
+      white-space: pre-line;
+    }
+    .results li:hover .func-hoverbox, .results li:focus .func-hoverbox {
+      display: block;
+      pointer-events: auto;
+    }
+    .func-hoverbox .func-hover-title {
+      font-weight: 600;
+      margin-bottom: 2px;
+      color: #222;
+      font-size: 1.04em;
+    }
+    .func-hoverbox .func-hover-syntax {
+      font-family: 'Roboto Mono', monospace, monospace;
+      background: #f7f7f7;
+      color: #4b4b4b;
+      border-radius: 5px;
+      padding: 2.5px 5px;
+      margin: 3px 0 0 0;
+      font-size: .97em;
+      display: inline-block;
+    }
+    .func-hoverbox .func-hover-type {
+      font-size: .97em;
+      margin-top: 5px;
+      color: #5d6d80;
+      font-weight: 500;
+    }
+    .func-hoverbox .func-hover-class {
+      color: #4285f4;
+      font-size: .95em;
+      margin-top: 2px;
+      word-break: break-all;
+    }
     .progress {
       width: 100%;
       max-width: 520px;
@@ -187,7 +262,6 @@
       box-shadow: 0 1px 3px rgba(30,40,60,0.04);
     }
     .progress-bar { background: var(--primary); height: 100%; width: 0%; }
-
     .tip, .msg {
       text-align: center;
       color: var(--fg-subtle);
@@ -198,7 +272,6 @@
     }
     .tip {margin-bottom: 36px;}
     .msg {margin-bottom: 10px;}
-
     .toggle-mode {
       position: fixed;
       right: 24px;
@@ -212,20 +285,20 @@
       transition: color .18s;
     }
     .toggle-mode:hover { color: var(--primary);}
-    /* Responsive Design */
     @media (max-width: 650px) {
       .container, .results, #search-bar, .progress {max-width: 98vw;}
       .search-logo {font-size: 2em;}
       .results li {padding: 14px 10px 10px 13px;}
       .func-title {font-size: 1em;}
       .func-class {font-size: .93em;}
+      .func-hoverbox { left: 0; right: 0; }
     }
     @media (max-width: 400px) {
       .func-details {font-size: .92em;}
       .search-logo {font-size: 1.39em;}
       .toggle-mode {top: 8px; right: 8px;}
+      .func-tag {padding: 2.5px 8px 2.5px 8px;}
     }
-    /* Dark mode */
     .dark {
       --bg: #181a1b;
       --fg: #ecedef;
@@ -241,8 +314,12 @@
       --shadow: 0 2px 8px rgba(8,12,40,0.23);
     }
     .dark mark { background: var(--highlight); color: var(--highlight-fg); }
+    .dark .func-hoverbox { background: #121212; color: #e0e6ee; border: 1px solid #35363a;}
+    .dark .func-hoverbox .func-hover-syntax { background: #262b30; color: #e7e6e3;}
+    .dark .func-hoverbox .func-hover-title { color: #fff;}
+    .dark .func-hoverbox .func-hover-type { color: #8ab4f8;}
+    .dark .func-hoverbox .func-hover-class { color: #8ab4f8;}
   </style>
-  <!-- Fuzzy Search: Fuse.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 </head>
 <body>
@@ -263,13 +340,12 @@
     <ul class="results" id="results"></ul>
     <div id="msg" class="msg"></div>
     <div class="tip">
-      <b>Tip:</b> <kbd>↑</kbd>/<kbd>↓</kbd> + <kbd>Enter</kbd> to jump. <span id="save-index-info"></span>
+      <b>Tip:</b> <kbd>↑</kbd>/<kbd>↓</kbd> + <kbd>Enter</kbd> to jump. Press <kbd>Ctrl+R</kbd> to re-index after updating docs.
     </div>
   </div>
   <script>
-    // --- Google-style JavaDoc Search ---
-    const STORAGE_KEY = 'javadoc_func_index_v3';
-    const INDEX_URLS_KEY = 'javadoc_func_index_urls_v3';
+    const STORAGE_KEY = 'javadoc_func_index_v8';
+    const INDEX_URLS_KEY = 'javadoc_func_index_urls_v8';
     let index = [], urls = [], results = [], selIdx = -1, fuse = null;
     const $ = id => document.getElementById(id);
 
@@ -307,14 +383,14 @@
           {name:'classname',weight:0.12},
           {name:'description',weight:0.12}
         ],
-        threshold: 0.37, // Fuzzy
+        threshold: 0.37,
         minMatchCharLength: 2,
         ignoreLocation: true,
         includeMatches: true,
         useExtendedSearch: true
       };
       if(!fuse) fuse = new Fuse(index, options);
-      results = fuse.search(q).slice(0,50); // Top 50
+      results = fuse.search(q).slice(0,50);
       selIdx = 0;
       updateResults(q);
     }
@@ -331,12 +407,28 @@
       return out;
     }
 
+    // --- Tag and Type Detection ---
+    function detectType(title, signature) {
+      if (signature && title && signature.includes(title + "(")) return "function";
+      if (signature && title && signature.includes(title + " ")) return "field";
+      if (/^[A-Z][A-Za-z0-9_]*$/.test(title)) return "class";
+      if (signature && signature.includes('(')) return "function";
+      if (signature && !signature.includes('(')) return "field";
+      return "unknown";
+    }
+    function typeTag(type) {
+      if(type==="function") return '<span class="func-tag tag-function">Function</span>';
+      if(type==="field") return '<span class="func-tag tag-field">Field</span>';
+      if(type==="class") return '<span class="func-tag tag-class">Class</span>';
+      return "";
+    }
+
+    // --- Results Rendering ---
     function updateResults(q='') {
       const ul = $('results');
       ul.innerHTML = '';
       results.forEach((res,i)=>{
         let {title,signature,classname,url} = res.item;
-        // Highlight
         let matches = res.matches||[];
         let hTitle = title, hSig = signature, hClass = classname;
         matches.forEach(m=>{
@@ -344,15 +436,28 @@
           if(m.key==='signature') hSig = highlight(signature,[m]);
           if(m.key==='classname') hClass = highlight(classname,[m]);
         });
+        const type = detectType(title, signature);
         let li=document.createElement('li');
         li.className = i===selIdx?'selected':'';
         li.tabIndex = 0;
-        li.innerHTML = `<span class="func-title">${hTitle}</span>
-        <div class="func-details">
-          <span>${hSig || ''}</span>
-          <span class="func-class">${hClass||''}</span>
-        </div>`;
-        li.onclick = (e)=>{ e.preventDefault(); window.open(url, "_blank", "noopener"); };
+        li.innerHTML = `
+          <div class="func-tags">${typeTag(type)}</div>
+          <span class="func-title">${hTitle}</span>
+          <div class="func-details">
+            <span>${hSig || ''}</span>
+            <span class="func-class">${hClass||''}</span>
+          </div>
+          <div class="func-hoverbox">
+            <div class="func-hover-title">${title}</div>
+            <div class="func-hover-type">${typeTag(type)} ${type.charAt(0).toUpperCase()+type.slice(1)}</div>
+            ${signature?`<div class="func-hover-syntax">${signature}</div>`:""}
+            ${classname?`<div class="func-hover-class">${classname}</div>`:""}
+            <div style="margin-top:7px;"><a href="${url}" target="_blank" style="color:#4285f4;text-decoration:underline;">Go to documentation</a></div>
+          </div>
+        `;
+        li.onclick = (e)=>{
+          window.open(url, "_blank", "noopener");
+        };
         li.onmouseover = ()=>{selIdx=i;updateResults(q);}
         ul.appendChild(li);
       });
@@ -379,12 +484,10 @@
       $('progress').style.display='none';
       localStorage.setItem(STORAGE_KEY, JSON.stringify(index));
       localStorage.setItem(INDEX_URLS_KEY, JSON.stringify(htmlFiles));
-      $('save-index-info').innerText = "Index saved ("+index.length+" functions)";
       fuse = null;
       performSearch($('search-bar').value);
     }
 
-    // --- Extract JavaDoc functions/classes ---
     function extractFunctions(html, file) {
       let parser = new DOMParser();
       let doc = parser.parseFromString(html, "text/html");
@@ -394,27 +497,17 @@
         let pre = h4.nextElementSibling;
         let signature = '';
         if(pre && pre.tagName==='PRE') signature = pre.textContent.trim();
-        // Class name
         let cls = '';
         let bc = doc.querySelector('.header .subTitle')||doc.querySelector('.header .title')||doc.querySelector('title');
         if(bc) cls = bc.textContent.trim();
-        // Description: find <div class="block"> after <pre>
-        // let desc = '';
-        // let block = pre && pre.nextElementSibling && pre.nextElementSibling.classList.contains('block')
-        //   ? pre.nextElementSibling : null;
-        // if(block) desc = block.textContent.trim();
-        // Anchor
         let anchor = h4.getAttribute('id') || h4.previousElementSibling?.getAttribute('name');
         let url = file+(anchor?('#'+anchor):'');
-        // Skip class h4
         if(title.match(/^[A-Z][A-Za-z0-9_]*$/)) return;
         index.push({title, signature, classname:cls, url});
       });
     }
 
-    // --- Find all HTML files using allclasses-noframe.html for completeness ---
     async function findAllHtmlFiles() {
-      // Use allclasses-noframe.html to find all class HTML files
       try {
         let resp = await fetch('allclasses-noframe.html');
         if (resp.ok) {
@@ -423,14 +516,11 @@
           let doc = parser.parseFromString(html, "text/html");
           let links = [...doc.querySelectorAll('a[href$=".html"]')];
           let files = Array.from(new Set(links.map(a => a.getAttribute('href'))));
-          // Remove fragment part if present, and resolve paths if necessary
           files = files.map(f => f.replace(/#.*$/, ''));
-          // Remove duplicates and empty
           files = files.filter(f => f && f.endsWith('.html'));
           return files;
         }
       } catch (e) {}
-      // Fallback: previous guessing logic
       let files = [];
       files.push('index.html');
       for(let i=0;i<100;i++) files.push('index-files/index-'+i+'.html');
@@ -442,14 +532,12 @@
       return files;
     }
 
-    // --- Load or build index ---
     async function loadIndex() {
       let saved = localStorage.getItem(STORAGE_KEY);
       let savedUrls = localStorage.getItem(INDEX_URLS_KEY);
       if(saved && savedUrls) {
         index = JSON.parse(saved);
         urls = JSON.parse(savedUrls);
-        $('save-index-info').innerText = "Index loaded ("+index.length+" functions)";
         fuse = null;
         performSearch('');
       } else {
@@ -460,13 +548,11 @@
     }
     loadIndex();
 
-    // --- Manual Reindex ---
     document.addEventListener('keydown', e=>{
       if(e.ctrlKey && e.key==='r') {
         if(confirm("Rebuild index?")) buildIndex();
       }
     });
-    $('save-index-info').innerHTML = "Press <kbd>Ctrl+R</kbd> to re-index after updating docs.";
   </script>
 </body>
 </html>
