@@ -4,622 +4,931 @@
   <meta charset="UTF-8">
   <title>JavaDoc Search</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <!-- Google Fonts for modern look -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #fff;
-      --fg: #212121;
-      --fg-subtle: #757575;
-      --primary: #4285f4;
-      --input-bg: #f1f3f4;
-      --border: #e0e0e0;
-      --result-bg: #fff;
-      --result-hover: #f8fafc;
-      --result-selected: #e3edfa;
-      --shadow: 0 1px 6px rgba(32,33,36,0.28);
-      --radius: 24px;
-      --highlight: #feefc3;
-      --highlight-fg: #3c4043;
-      --max-width: 600px;
-      --search-height: 56px;
-      --transition: all .18s cubic-bezier(.4,0,.2,1);
-      --tag-function: #34a853;
-      --tag-field: #fbbc04;
-      --tag-class: #1a73e8;
+      --bg: #ffffff;
+      --fg: #1f2937;
+      --fg-muted: #6b7280;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --secondary: #f3f4f6;
+      --border: #e5e7eb;
+      --border-focus: #3b82f6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --radius: 8px;
+      --radius-lg: 12px;
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
+    .dark {
+      --bg: #111827;
+      --fg: #f9fafb;
+      --fg-muted: #9ca3af;
+      --secondary: #1f2937;
+      --border: #374151;
+      --border-focus: #60a5fa;
+    }
+    * { box-sizing: border-box; }
     body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
       color: var(--fg);
-      font-family: 'Roboto', Arial, sans-serif;
       margin: 0;
       padding: 0;
       min-height: 100vh;
-      transition: background .2s, color .2s;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-      min-height: 100vh;
+      line-height: 1.6;
     }
     .container {
-      width: 100%;
-      max-width: var(--max-width);
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 0 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      padding: 2rem 1rem;
     }
-    .search-logo {
-      font-size: 2.4rem;
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .logo {
+      font-size: 2.5rem;
       font-weight: 700;
       color: var(--primary);
-      letter-spacing: -1px;
-      text-align: center;
-      margin-top: 8vh;
-      margin-bottom: 20px;
-      font-family: 'Roboto', Arial, sans-serif;
-      user-select: none;
-      line-height: 1.1;
-      text-shadow: 0 2px 8px rgba(60, 100, 255, 0.03);
+      margin-bottom: 0;
+      letter-spacing: -0.025em;
     }
-    #search-bar {
-      width: 100%;
-      max-width: 520px;
-      height: var(--search-height);
+    .subtitle {
+      color: var(--fg-muted);
       font-size: 1.1rem;
-      padding: 0 52px 0 18px;
-      border-radius: var(--radius);
-      border: 1.5px solid var(--border);
-      background: var(--input-bg);
-      color: var(--fg);
-      box-shadow: var(--shadow);
-      outline: none;
-      transition: border-color .14s;
-      margin-bottom: 18px;
-      box-sizing: border-box;
+      margin-bottom: 2rem;
     }
-    #search-bar:focus {
-      border-color: var(--primary);
-      background: #fff;
+    .search-section {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+    }
+    .search-bar {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 3rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      background: var(--bg);
+      color: var(--fg);
+      transition: var(--transition);
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
     }
     .search-icon {
       position: absolute;
-      right: 30px;
+      left: 1rem;
       top: 50%;
       transform: translateY(-50%);
-      color: var(--primary);
-      font-size: 1.4rem;
-      pointer-events: none;
+      color: var(--fg-muted);
+      width: 1.25rem;
+      height: 1.25rem;
     }
-    .search-bar-wrap {
-      position: relative;
-      width: 100%;
-      max-width: 520px;
-      margin-bottom: 10px;
+    .filters {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
     }
-    .results {
-      width: 100%;
-      max-width: 520px;
-      background: var(--result-bg);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
-      margin: 0;
-      padding: 0;
-      list-style: none;
-      transition: var(--transition);
-      overflow: hidden;
-      margin-bottom: 8px;
+    @media (max-width: 768px) {
+      .filters {
+        grid-template-columns: 1fr;
+      }
     }
-    .results li {
+    .filter-group {
       display: flex;
       flex-direction: column;
-      padding: 16px 24px 12px 20px;
-      cursor: pointer;
-      border-bottom: 1px solid var(--border);
-      transition: background .12s;
-      background: var(--result-bg);
-      word-break: break-word;
-      white-space: normal;
-      font-size: 1.07rem;
-      max-width: 100%;
-      box-sizing: border-box;
-      position: relative;
-      min-height: 64px;
     }
-    .results li:last-child { border-bottom: none; }
-    .results li.selected,
-    .results li:hover,
-    .results li:focus-visible {
-      background: var(--result-selected);
+    .filter-label {
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: var(--fg);
+      font-size: 0.875rem;
     }
-    .results li .result-link {
-      width: 100%;
-      height: 100%;
-      display: block;
-      color: inherit;
-      text-decoration: none;
+    .filter-select {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      color: var(--fg);
+      font-size: 0.875rem;
+      transition: var(--transition);
+    }
+    .filter-select:focus {
       outline: none;
-      position: relative;
-      z-index: 1;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
+    }
+    .filter-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-top: 1px solid var(--border);
+      margin-top: 1rem;
+      font-size: 0.875rem;
+      color: var(--fg-muted);
+    }
+    .clear-filters {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--fg-muted);
+      padding: 0.25rem 0.75rem;
+      border-radius: var(--radius);
+      font-size: 0.75rem;
       cursor: pointer;
-      background: transparent;
-      border: none;
-      padding: 0;
-      margin: 0;
+      transition: var(--transition);
     }
-    .results li .result-link:focus-visible {
-      outline: 2px solid var(--primary);
-      outline-offset: 2px;
+    .clear-filters:hover {
+      background: var(--secondary);
+      color: var(--fg);
     }
-    .no-results-ct {
+    .results-section {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .results-header {
+      padding: 1rem 1.5rem;
+      background: var(--secondary);
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .results-count {
+      color: var(--fg-muted);
+      font-weight: 400;
+      font-size: 0.875rem;
+    }
+    .results-container {
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    .result-item {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+    }
+    .result-item:hover, .result-item.selected {
+      background: var(--secondary);
+    }
+    .result-item:last-child {
+      border-bottom: none;
+    }
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .result-type {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+    }
+    .type-class { background: #dbeafe; color: #1e40af; }
+    .type-method { background: #dcfce7; color: #166534; }
+    .type-field { background: #fef3c7; color: #92400e; }
+    .type-constructor { background: #fce7f3; color: #be185d; }
+    .type-enum { background: #e0e7ff; color: #3730a3; }
+    .dark .type-class { background: #1e3a8a; color: #93c5fd; }
+    .dark .type-method { background: #14532d; color: #86efac; }
+    .dark .type-field { background: #451a03; color: #fbbf24; }
+    .dark .type-constructor { background: #831843; color: #f9a8d4; }
+    .dark .type-enum { background: #312e81; color: #a5b4fc; }
+    .result-name {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--fg);
+    }
+    .result-class {
+      color: var(--primary);
+      font-size: 0.875rem;
+      margin-left: auto;
+    }
+    .result-signature {
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+      font-size: 0.875rem;
+      color: var(--fg-muted);
+      background: var(--secondary);
+      padding: 0.5rem;
+      border-radius: var(--radius);
+      margin: 0.5rem 0;
+      overflow-x: auto;
+    }
+    .result-description {
+      color: var(--fg-muted);
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+    .result-package {
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      margin-top: 0.25rem;
+    }
+    .loading {
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 100px;
-      height: 140px;
+      padding: 3rem;
+      color: var(--fg-muted);
     }
-    .no-results-msg {
-      color: var(--fg-subtle);
-      font-size: 1.05rem;
+    .loading-spinner {
+      width: 2rem;
+      height: 2rem;
+      border: 2px solid var(--border);
+      border-top: 2px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 1rem;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .no-results {
       text-align: center;
-      margin: 0 auto;
-      width: 100%;
-      letter-spacing: 0.01em;
-      font-weight: 500;
+      padding: 3rem;
+      color: var(--fg-muted);
     }
-    .func-title {
-      font-weight: 500;
-      font-size: 1.13em;
-      color: var(--fg);
-      margin-bottom: 3px;
-      line-height: 1.3;
-      word-break: break-word;
-      display: inline-block;
-      vertical-align: middle;
-      max-width: 80%;
+    .no-results-icon {
+      width: 4rem;
+      height: 4rem;
+      margin: 0 auto 1rem;
+      opacity: 0.5;
     }
-    .func-details {
-      font-size: .97em;
-      color: var(--fg-subtle);
-      line-height: 1.5;
-      margin-top: 1px;
-      max-width: 100%;
-      word-break: break-word;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 8px;
-    }
-    .func-class {
-      font-size: .95em;
-      color: var(--primary);
-      margin-left: auto;
-      max-width: 60%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-weight: 400;
-      flex-shrink: 1;
-    }
-    .func-tags {
-      display: flex;
-      align-items: center;
-      gap: 0;
-      margin-bottom: 2.5px;
-      margin-right: 8px;
-    }
-    .func-tag {
-      display: inline-block;
-      font-size: 0.97em;
-      font-weight: 500;
-      color: #fff;
-      background: var(--primary);
-      border-radius: 7px;
-      padding: 3.5px 13px 3.5px 13px;
-      margin-right: 9px;
-      margin-bottom: 2px;
-      text-transform: capitalize;
-      box-shadow: 0 1px 2px rgba(32,33,36,0.08);
-      letter-spacing: .02em;
-      vertical-align: middle;
-    }
-    .tag-function { background: var(--tag-function);}
-    .tag-field { background: var(--tag-field); color: #222;}
-    .tag-class { background: var(--tag-class);}
-    mark {
-      background: var(--highlight);
-      color: var(--highlight-fg);
-      border-radius: 3px;
-      font-weight: 500;
-      padding: 0 2px;
-      word-break: break-word;
-      white-space: normal;
-    }
-    /* HOVERBOX: right side of result instead of below */
-    .func-hoverbox {
-      display: none;
-      position: absolute;
-      left: 100%;
-      top: 0;
-      margin-left: 14px;
-      z-index: 10;
-      background: #fff;
-      color: #222;
-      border: 1px solid #e0e0e0;
-      border-radius: 10px;
-      padding: 12px 16px;
-      box-shadow: 0 6px 18px rgba(30,40,90,0.13);
-      font-size: .98em;
-      min-width: 220px;
-      max-width: 350px;
-      pointer-events: none;
-      white-space: pre-line;
-      transition: opacity .13s;
-    }
-    .results li:hover .func-hoverbox,
-    .results li:focus-within .func-hoverbox,
-    .results li.selected .func-hoverbox {
-      display: block;
-      pointer-events: auto;
-    }
-    .func-hoverbox .func-hover-title {
-      font-weight: 600;
-      margin-bottom: 2px;
-      color: #222;
-      font-size: 1.04em;
-    }
-    .func-hoverbox .func-hover-syntax {
-      font-family: 'Roboto Mono', monospace, monospace;
-      background: #f7f7f7;
-      color: #4b4b4b;
-      border-radius: 5px;
-      padding: 2.5px 5px;
-      margin: 3px 0 0 0;
-      font-size: .97em;
-      display: inline-block;
-    }
-    .func-hoverbox .func-hover-type {
-      font-size: .97em;
-      margin-top: 5px;
-      color: #5d6d80;
-      font-weight: 500;
-    }
-    .func-hoverbox .func-hover-class {
-      color: #4285f4;
-      font-size: .95em;
-      margin-top: 2px;
-      word-break: break-all;
-    }
-    .progress {
-      width: 100%;
-      max-width: 520px;
-      height: 7px;
-      background: var(--input-bg);
-      margin: 20px 0 10px 0;
-      border-radius: 3px;
-      overflow: hidden;
-      box-shadow: 0 1px 3px rgba(30,40,60,0.04);
-    }
-    .progress-bar { background: var(--primary); height: 100%; width: 0%; }
-    .tip, .msg {
-      text-align: center;
-      color: var(--fg-subtle);
-      font-size: .97em;
-      margin-top: 10px;
-      margin-bottom: 0;
-      user-select: none;
-    }
-    .tip {margin-bottom: 36px;}
-    .msg {margin-bottom: 10px;}
-    .toggle-mode {
+    .theme-toggle {
       position: fixed;
-      right: 24px;
-      top: 22px;
-      background: none;
-      border: none;
-      font-size: 1.4em;
-      color: var(--fg-subtle);
+      top: 1rem;
+      right: 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.5rem;
       cursor: pointer;
-      z-index: 20;
-      transition: color .18s;
+      transition: var(--transition);
+      box-shadow: var(--shadow);
     }
-    .toggle-mode:hover { color: var(--primary);}
-    @media (max-width: 950px) {
-      .func-hoverbox {
-        left: auto;
-        right: 0;
-        margin-left: 0;
-        margin-right: -340px;
-        min-width: 180px;
-        max-width: 270px;
+    .theme-toggle:hover {
+      background: var(--secondary);
+    }
+    .highlight {
+      background: #fef08a;
+      color: #854d0e;
+      padding: 0.125rem 0.25rem;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+    .dark .highlight {
+      background: #451a03;
+      color: #fbbf24;
+    }
+    .keyboard-hint {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      box-shadow: var(--shadow);
+      display: none;
+    }
+    .keyboard-hint.show {
+      display: block;
+    }
+    .kbd {
+      background: var(--secondary);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0.125rem 0.25rem;
+      font-size: 0.75rem;
+      font-family: monospace;
+    }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      .logo { font-size: 2rem; }
+      .filter-stats {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+      }
+      .result-header { flex-wrap: wrap; }
+      .result-class { margin-left: 0; margin-top: 0.25rem; }
+    }
+    .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .company-logo {
+      height: 3rem;
+      width: auto;
+      max-width: 3rem;
+      object-fit: contain;
+    }
+    @media (max-width: 768px) {
+      .logo-container {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .company-logo {
+        height: 2.5rem;
+        max-width: 2.5rem;
       }
     }
-    @media (max-width: 650px) {
-      .container, .results, #search-bar, .progress {max-width: 98vw;}
-      .search-logo {font-size: 2em;}
-      .results li {padding: 14px 10px 10px 13px;}
-      .func-title {font-size: 1em;}
-      .func-class {font-size: .93em;}
-      .func-hoverbox {
-        position: static;
-        max-width: 100vw;
-        left: 0;
-        right: 0;
-        margin-left: 0;
-        margin-right: 0;
-        margin-top: 12px;
-        border-radius: 12px;
-      }
-    }
-    @media (max-width: 400px) {
-      .func-details {font-size: .92em;}
-      .search-logo {font-size: 1.39em;}
-      .toggle-mode {top: 8px; right: 8px;}
-      .func-tag {padding: 2.5px 8px 2.5px 8px;}
-    }
-    .dark {
-      --bg: #181a1b;
-      --fg: #ecedef;
-      --fg-subtle: #a3a6ab;
-      --primary: #8ab4f8;
-      --input-bg: #222326;
-      --border: #35363a;
-      --result-bg: #232325;
-      --result-hover: #232325;
-      --result-selected: #26384c;
-      --highlight: #2d3b53;
-      --highlight-fg: #fffbe5;
-      --shadow: 0 2px 8px rgba(8,12,40,0.23);
-    }
-    .dark mark { background: var(--highlight); color: var(--highlight-fg); }
-    .dark .func-hoverbox { background: #121212; color: #e0e6ee; border: 1px solid #35363a;}
-    .dark .func-hoverbox .func-hover-syntax { background: #262b30; color: #e7e6e3;}
-    .dark .func-hoverbox .func-hover-title { color: #fff;}
-    .dark .func-hoverbox .func-hover-type { color: #8ab4f8;}
-    .dark .func-hoverbox .func-hover-class { color: #8ab4f8;}
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 </head>
 <body>
-  <button class="toggle-mode" id="toggle-mode" title="Toggle dark/light">&#9788;</button>
+  <button class="theme-toggle" id="theme-toggle" title="Toggle theme">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="5"/>
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+    </svg>
+  </button>
   <div class="container">
-    <div class="search-logo">JavaDoc Search</div>
-    <div class="search-bar-wrap">
-      <input id="search-bar" type="text" autocomplete="off" spellcheck="false"
-        placeholder="Try: removeRow, getList, isVisible, ...">
-      <span class="search-icon" aria-hidden="true">
-        <svg height="22" viewBox="0 0 24 24" width="22" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="11" cy="11" r="7" stroke="#4285f4" stroke-width="2"/>
-          <path d="M20 20L16.65 16.65" stroke="#4285f4" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </span>
+    <div class="header">
+      <div class="logo-container">
+        
+        <h1 class="logo">JavaDoc Explorer</h1>
+      </div>
+      <p class="subtitle">Search through packages, classes, and methods</p>
     </div>
-    <div class="progress" id="progress" style="display:none"><div class="progress-bar" id="progress-bar"></div></div>
-    <ul class="results" id="results"></ul>
-    <div id="msg" class="msg"></div>
-    <div class="tip">
-      <b>Tip:</b> <kbd>↑</kbd>/<kbd>↓</kbd> + <kbd>Enter</kbd> to jump. Press <kbd>Ctrl+R</kbd> to re-index after updating docs.
+    <div class="search-section">
+      <div class="search-bar">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input
+          type="text"
+          class="search-input"
+          id="search-input"
+          placeholder="Search for classes, methods, fields... (e.g., 'Button', 'getText', 'setVisible')"
+          autocomplete="off"
+          spellcheck="false"
+        >
+      </div>
+      <div class="filters">
+        <div class="filter-group">
+          <label class="filter-label" for="package-filter">Package</label>
+          <select class="filter-select" id="package-filter">
+            <option value="">All Packages</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label" for="class-filter">Class</label>
+          <select class="filter-select" id="class-filter">
+            <option value="">All Classes</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-stats">
+        <span id="results-info">Loading...</span>
+        <button class="clear-filters" id="clear-filters">Clear All Filters</button>
+      </div>
+    </div>
+    <div class="results-section">
+      <div class="results-header">
+        <span>Search Results</span>
+        <span class="results-count" id="results-count">0 items</span>
+      </div>
+      <div class="results-container" id="results-container">
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          <span>Loading JavaDoc data...</span>
+        </div>
+      </div>
     </div>
   </div>
+  <div class="keyboard-hint" id="keyboard-hint">
+    Use <span class="kbd">↑</span> <span class="kbd">↓</span> to navigate, <span class="kbd">Enter</span> to open, <span class="kbd">Esc</span> to clear selection
+  </div>
   <script>
-    const STORAGE_KEY = 'javadoc_func_index_v8';
-    const INDEX_URLS_KEY = 'javadoc_func_index_urls_v8';
-    let index = [], urls = [], results = [], selIdx = -1, fuse = null;
-    const $ = id => document.getElementById(id);
+    class JavaDocExplorer {
+      constructor() {
+        this.data = [];
+        this.filteredData = [];
+        this.selectedIndex = -1;
+        this.isLoading = true;
 
-    // --- Dark/Light Mode ---
-    function setMode(dark) {
-      document.body.classList.toggle('dark', dark);
-      localStorage.setItem('javadoc_dark', dark ? "1" : "0");
-      $('toggle-mode').innerHTML = dark ? "&#9790;" : "&#9788;";
-    }
-    setMode(localStorage.getItem('javadoc_dark')==="1");
-    $('toggle-mode').onclick = () => setMode(!document.body.classList.contains('dark'));
+        this.searchInput = document.getElementById('search-input');
+        this.packageFilter = document.getElementById('package-filter');
+        this.classFilter = document.getElementById('class-filter');
+        this.resultsContainer = document.getElementById('results-container');
+        this.resultsCount = document.getElementById('results-count');
+        this.resultsInfo = document.getElementById('results-info');
+        this.clearFiltersBtn = document.getElementById('clear-filters');
+        this.keyboardHint = document.getElementById('keyboard-hint');
 
-    // --- Keyboard Navigation ---
-    $('search-bar').addEventListener('keydown', e => {
-      if(!results.length) return;
-      if(e.key==="ArrowDown") { selIdx++; if(selIdx>=results.length)selIdx=0; updateResults();}
-      else if(e.key==="ArrowUp") { selIdx--; if(selIdx<0)selIdx=results.length-1; updateResults();}
-      else if(e.key==="Enter" && selIdx>=0) {
-        window.open(results[selIdx].item.url, "_blank", "noopener");
+        this.init();
       }
-      else if(e.key==="Escape") { $('search-bar').blur(); }
-    });
 
-    // --- Fuzzy Search ---
-    $('search-bar').addEventListener('input', e => {
-      performSearch(e.target.value);
-    });
-
-    function performSearch(q) {
-      if(!q.trim()) { results = []; selIdx = -1; updateResults(); return;}
-      let options = {
-        keys: [
-          {name:'title',weight:0.48},
-          {name:'signature',weight:0.28},
-          {name:'classname',weight:0.12},
-          {name:'description',weight:0.12}
-        ],
-        threshold: 0.37,
-        minMatchCharLength: 2,
-        ignoreLocation: true,
-        includeMatches: true,
-        useExtendedSearch: true
-      };
-      if(!fuse) fuse = new Fuse(index, options);
-      results = fuse.search(q).slice(0,50);
-      selIdx = 0;
-      updateResults(q);
-    }
-
-    function highlight(text, matches) {
-      if(!matches || !matches.length) return text;
-      let s = 0, out = '', m = matches[0];
-      for(let i=0; i<m.indices.length; i++) {
-        let [from,to] = m.indices[i];
-        out += text.slice(s,from) + '<mark>' + text.slice(from,to+1) + '</mark>';
-        s = to+1;
+      async init() {
+        this.setupEventListeners();
+        this.setupTheme();
+        await this.loadData();
+        this.populateFilters();
+        this.applyFilters();
+        this.isLoading = false;
       }
-      out += text.slice(s);
-      return out;
-    }
 
-    // --- Tag and Type Detection ---
-    function detectType(title, signature) {
-      if (signature && title && signature.includes(title + "(")) return "function";
-      if (signature && title && signature.includes(title + " ")) return "field";
-      if (/^[A-Z][A-Za-z0-9_]*$/.test(title)) return "class";
-      if (signature && signature.includes('(')) return "function";
-      if (signature && !signature.includes('(')) return "field";
-      return "unknown";
-    }
-    function typeTag(type) {
-      if(type==="function") return '<span class="func-tag tag-function">Function</span>';
-      if(type==="field") return '<span class="func-tag tag-field">Field</span>';
-      if(type==="class") return '<span class="func-tag tag-class">Class</span>';
-      return "";
-    }
-
-    // --- Results Rendering ---
-    function updateResults(q='') {
-      const ul = $('results');
-      ul.innerHTML = '';
-      if (!results.length) {
-        ul.innerHTML = `<li class="no-results-ct"><div class="no-results-msg">No results</div></li>`;
-        return;
-      }
-      results.forEach((res,i)=>{
-        let {title,signature,classname,url} = res.item;
-        let matches = res.matches||[];
-        let hTitle = title, hSig = signature, hClass = classname;
-        matches.forEach(m=>{
-          if(m.key==='title') hTitle = highlight(title,[m]);
-          if(m.key==='signature') hSig = highlight(signature,[m]);
-          if(m.key==='classname') hClass = highlight(classname,[m]);
+      setupEventListeners() {
+        // Search and filter inputs
+        this.searchInput.addEventListener('input', () => this.applyFilters());
+        this.packageFilter.addEventListener('change', () => this.onPackageChange());
+        this.classFilter.addEventListener('change', () => this.applyFilters());
+        // Clear filters
+        this.clearFiltersBtn.addEventListener('click', () => this.clearAllFilters());
+        // Keyboard navigation
+        this.searchInput.addEventListener('keydown', (e) => this.handleKeyNavigation(e));
+        document.addEventListener('keydown', (e) => this.handleGlobalKeys(e));
+        // Show keyboard hints on focus
+        this.searchInput.addEventListener('focus', () => {
+          this.keyboardHint.classList.add('show');
+          setTimeout(() => this.keyboardHint.classList.remove('show'), 3000);
         });
-        const type = detectType(title, signature);
-        let li=document.createElement('li');
-        li.className = i===selIdx?'selected':'';
-        li.tabIndex = 0;
-        li.innerHTML = `
-          <a class="result-link" href="${url}" target="_blank" tabindex="0">
-            <div class="func-tags">${typeTag(type)}</div>
-            <span class="func-title">${hTitle}</span>
-            <div class="func-details">
-              <span>${hSig || ''}</span>
-              <span class="func-class">${hClass||''}</span>
+      }
+
+      setupTheme() {
+        const themeToggle = document.getElementById('theme-toggle');
+        const savedTheme = localStorage.getItem('javadoc-theme') || 'light';
+        if (savedTheme === 'dark') {
+          document.body.classList.add('dark');
+        }
+        themeToggle.addEventListener('click', () => {
+          document.body.classList.toggle('dark');
+          const isDark = document.body.classList.contains('dark');
+          localStorage.setItem('javadoc-theme', isDark ? 'dark' : 'light');
+        });
+      }
+
+      async loadData() {
+        try {
+          const files = await this.getJavaDocFiles();
+          let processed = 0;
+
+          for (const file of files) {
+            try {
+              const response = await fetch(file.path);
+              if (response.ok) {
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const classData = this.parseClassFile(doc, file);
+                if (classData && classData.length > 0) {
+                  this.data.push(...classData);
+                }
+              }
+            } catch (error) {
+              console.warn(`Failed to load ${file.path}:`, error);
+            }
+            processed++;
+            this.updateLoadingProgress(processed, files.length);
+          }
+          // Sort data for better user experience
+          this.data.sort((a, b) => {
+            if (a.type !== b.type) {
+              const typeOrder = { method: 0, field: 1 };
+              return (typeOrder[a.type] || 5) - (typeOrder[b.type] || 5);
+            }
+            return a.name.localeCompare(b.name);
+          });
+          // Show all results after loading
+          this.filteredData = this.data.slice();
+          this.renderResults();
+          this.updateResultsInfo();
+          this.isLoading = false;
+        } catch (error) {
+          console.error('Failed to load JavaDoc data:', error);
+          this.showError('Failed to load JavaDoc data. Please refresh the page.');
+        }
+      }
+
+      async getJavaDocFiles() {
+        // ... same, unchanged ...
+        const classNames = {
+          // ...class name lists...
+          'com/intellinum/mia/app/action': ['Action', 'ActionType', 'ClientAction', 'DumpSql'],
+          'com/intellinum/mia/app/device': ['DeviceInfo', 'DeviceType'],
+          'com/intellinum/mia/app/event': ['ApplicationEventListener', 'ButtonEventListener', 'CheckBoxEventListener', 'ComboEventListener', 'ComponentEventListener', 'ContainerEventListener', 'Event', 'EventListener', 'ListItemEventListener', 'LOVEventListener', 'PageEventListener', 'PreventDefaultException', 'TableSelectionEventListener', 'TextInputEventListener'],
+          'com/intellinum/mia/app': ['FlexiObject'],
+          'com/intellinum/mia/app/logfire/logical': ['LogFireJSONObject'],
+          'com/intellinum/mia/app/logfire/logical/util': ['WMSCloudJSONObject', 'WMSCloudRFInterface'],
+          'com/intellinum/mia/app/pages': ['AboutPage', 'DeviceSelectionPage', 'DynamicApplication', 'DynamicPage', 'FlexiApplication', 'KillSessionPage', 'LoginPage', 'LOVPage', 'MenuPage', 'OrganizationValidationApplication', 'OrganizationValidationPage', 'PersonalizationAdminApplication', 'PersonalizationAdminPage', 'ResponsibilityPage'],
+          'com/intellinum/mia/app/pages/lov': ['LOVDatabase', 'LOVDataSource', 'LOVOracleWebService', 'LOVWebServiceNew'],
+          'com/intellinum/mia/app/runtime': ['QueryManager', 'Session'],
+          'com/intellinum/mia/app/ui': ['Application', 'AttachmentField', 'Block', 'Button', 'Chart', 'CheckBoxField', 'Combo', 'ComboItem', 'Component', 'Container', 'Div', 'Divider', 'Field', 'Fieldset', 'FlexiObjectFactory', 'FlexiUIObject', 'GPSField', 'Grid', 'Image', 'InputField', 'KPI', 'Label', 'List', 'ListBox', 'ListItem', 'LOVField', 'MenuItem', 'Page', 'RadioButtonField', 'RadioButtonGroup', 'SideMenu', 'SQLTableDataSource', 'Table', 'TableColumn', 'TableDataSource', 'TableRow', 'TextArea', 'TextInputField'],
+          'com/intellinum/mia/app/ui/logical': ['FlexiAsyncTask', 'FlexiLogicalObject', 'FlexiWebService', 'VoiceMacro'],
+          'com/intellinum/mia/app/util': ['FlexiAPI', 'FlexiCredential', 'FlexiSoundMessageMap', 'FlexiUtil', 'JavaInterpreter', 'JavaMail', 'JavaScriptInterpreter', 'LicenseValidator', 'Md5Encryption', 'PlSqlIntepreter', 'PlSqlParam', 'ProfileLevel', 'SftpFileTransfer', 'SftpFileTransfer2', 'TableResult', 'TokenGenerator', 'WebServiceUtil', 'WebSoap'],
+          'com/intellinum/mia/app/util/converter': ['Converter', 'JSONConverter', 'JSONConverter2', 'PathRelationship', 'XMLConverter'],
+          'com/intellinum/mia/app/util/license': ['AesEncryptor', 'LicenseValidator', 'RegisteredUserLicenseManager'],
+          'com/intellinum/mia/app/util/log': ['DebugLog', 'Log'],
+          'com/intellinum/mia/app/util/patch': ['DatabasePatch'],
+          'com/intellinum/mia/app/util/scan': ['BarcodeComponent', 'BarcodeManager', 'BarcodeType'],
+          'com/intellinum/mia/app/util/statistic': ['BenchmarkData', 'MemoryUsage', 'Statistic'],
+          'com/intellinum/mia/app/util/tools': ['LogAnalysis', 'LogFirePatternConsolidator'],
+          'com/intellinum/mia/app/util/tools/files': ['FlexiZip', 'PDFCreator'],
+          'com/intellinum/mia/app/util/translation': ['GlobalTranslation', 'PageTranslation', 'TranslationManager'],
+          'com/intellinum/mia/app/util/webservice': ['RestWebService', 'SoapWebService', 'WebService'],
+          'com/intellinum/mia/app/util/worker': ['FlexiBackgroundWorkerThread', 'FlexiTask', 'TaskState']
+        };
+        const files = [];
+        for (const pkg in classNames) {
+          const classes = classNames[pkg];
+          for (const className of classes) {
+            files.push({
+              path: `${pkg}/${className}.html`,
+              package: pkg.replace(/\//g, '.'),
+              className: className
+            });
+          }
+        }
+        return files;
+      }
+
+      // Only add methods and fields to the search index.
+      parseClassFile(doc, file) {
+        const items = [];
+        const packageName = file.package;
+        const className = file.className;
+        this.parseMethods(doc, items, className, packageName, file.path);
+        this.parseFields(doc, items, className, packageName, file.path);
+        return items;
+      }
+      parseMethods(doc, items, className, packageName, basePath) {
+        const selectors = [
+          '.methodSummary table tr',
+          '.methodSummary .memberSummary tr',
+          '.method-summary tr',
+          '.summary .method tr',
+          'table.memberSummary tr'
+        ];
+        this.parseMembers(doc, selectors, 'method', items, className, packageName, basePath);
+      }
+      parseFields(doc, items, className, packageName, basePath) {
+        const selectors = [
+          '.fieldSummary table tr',
+          '.fieldSummary .memberSummary tr',
+          '.field-summary tr',
+          '.summary .field tr'
+        ];
+        this.parseMembers(doc, selectors, 'field', items, className, packageName, basePath);
+      }
+
+      parseMembers(doc, selectors, type, items, className, packageName, basePath) {
+        for (const selector of selectors) {
+          const rows = doc.querySelectorAll(selector);
+          rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length < 2) return;
+            // Try to find the name link in different cell positions
+            let nameLink = null;
+            let nameCell = null;
+            let typeCell = null;
+            for (let i = cells.length - 1; i >= 0; i--) {
+              const link = cells[i].querySelector('a');
+              if (link && link.textContent.trim()) {
+                nameLink = link;
+                nameCell = cells[i];
+                typeCell = cells[0];
+                break;
+              }
+            }
+            if (!nameLink) return;
+            const memberName = nameLink.textContent.trim();
+            if (!memberName || memberName.length < 1) return;
+            // Skip table headers
+            if (memberName.toLowerCase().includes('modifier') ||
+                memberName.toLowerCase().includes('type') ||
+                memberName.toLowerCase().includes('description')) {
+              return;
+            }
+            // Extract signature from multiple sources
+            let signature = this.extractSignature(nameCell, typeCell, memberName, type);
+            // Extract description
+            const description = this.extractMemberDescription(nameCell, memberName, type, className);
+            // Build URL
+            const memberUrl = this.resolveUrl(nameLink.getAttribute('href'), basePath);
+            // Create search text
+            const searchText = `${memberName} ${signature} ${description} ${className} ${packageName} ${type}`.toLowerCase();
+
+            items.push({
+              type: type,
+              name: memberName,
+              className: className,
+              package: packageName,
+              signature: signature,
+              description: description,
+              url: memberUrl,
+              searchText: searchText
+            });
+          });
+        }
+      }
+      extractSignature(nameCell, typeCell, memberName, type) {
+        const codeElements = nameCell.querySelectorAll('code');
+        for (const code of codeElements) {
+          const text = this.cleanSignature(code.textContent || code.innerText);
+          if (text && text.includes(memberName)) {
+            return text;
+          }
+        }
+        const cellText = this.cleanSignature(nameCell.textContent || nameCell.innerText);
+        if (cellText && cellText.includes(memberName)) {
+          return cellText;
+        }
+        if (typeCell) {
+          const typeText = this.extractText(typeCell);
+          if (typeText) {
+            return `${typeText} ${memberName}`;
+          }
+        }
+        switch (type) {
+          case 'method':
+            return `${memberName}()`;
+          case 'field':
+            return `${memberName}`;
+          default:
+            return memberName;
+        }
+      }
+      extractMemberDescription(nameCell, memberName, type, className) {
+        const descSelectors = [
+          '.description',
+          '.block',
+          '.summary',
+          'div:last-child'
+        ];
+        for (const selector of descSelectors) {
+          const descElement = nameCell.querySelector(selector);
+          if (descElement) {
+            const text = this.extractText(descElement);
+            if (text && text.length > 5 && !text.includes(memberName)) {
+              return text;
+            }
+          }
+        }
+        let nextElement = nameCell.nextElementSibling;
+        while (nextElement) {
+          const text = this.extractText(nextElement);
+          if (text && text.length > 10) {
+            return text;
+          }
+          nextElement = nextElement.nextElementSibling;
+        }
+        return `${memberName} ${type} of ${className}`;
+      }
+      extractText(element) {
+        if (!element) return '';
+        let text = element.textContent || element.innerText || '';
+        text = text.replace(/\s+/g, ' ').trim();
+        text = text.replace(/^\s*\n\s*/, '').replace(/\s*\n\s*$/, '');
+        return text;
+      }
+      cleanSignature(signature) {
+        if (!signature) return '';
+        return signature
+          .replace(/\s+/g, ' ')
+          .replace(/^\s*\n\s*/, '')
+          .replace(/\s*\n\s*$/, '')
+          .trim();
+      }
+      resolveUrl(href, basePath) {
+        if (!href) return basePath;
+        if (href.startsWith('http')) return href;
+        const baseDir = basePath.substring(0, basePath.lastIndexOf('/'));
+        return href.startsWith('#') ? basePath + href : `${baseDir}/${href}`;
+      }
+      updateLoadingProgress(current, total) {
+        const percentage = Math.round((current / total) * 100);
+        this.resultsInfo.textContent = `Loading... ${percentage}% (${current}/${total})`;
+      }
+      populateFilters() {
+        // Populate package filter
+        const packages = [...new Set(this.data.map(item => item.package))].sort();
+        this.packageFilter.innerHTML = '<option value="">All Packages</option>';
+        packages.forEach(pkg => {
+          const option = document.createElement('option');
+          option.value = pkg;
+          option.textContent = pkg;
+          this.packageFilter.appendChild(option);
+        });
+        this.updateClassFilter();
+      }
+      updateClassFilter() {
+        const selectedPackage = this.packageFilter.value;
+        let classes;
+        if (selectedPackage) {
+          classes = [...new Set(this.data
+            .filter(item => item.package === selectedPackage)
+            .map(item => item.className))].sort();
+        } else {
+          classes = [...new Set(this.data.map(item => item.className))].sort();
+        }
+        const currentValue = this.classFilter.value;
+        this.classFilter.innerHTML = '<option value="">All Classes</option>';
+        classes.forEach(cls => {
+          const option = document.createElement('option');
+          option.value = cls;
+          option.textContent = cls;
+          this.classFilter.appendChild(option);
+        });
+        if (classes.includes(currentValue)) {
+          this.classFilter.value = currentValue;
+        }
+      }
+      onPackageChange() {
+        this.updateClassFilter();
+        this.applyFilters();
+      }
+      applyFilters() {
+        if (this.isLoading) return;
+        const searchTerm = this.searchInput.value.toLowerCase().trim();
+        const packageFilter = this.packageFilter.value;
+        const classFilter = this.classFilter.value;
+
+        this.filteredData = this.data.filter(item => {
+          if (packageFilter && item.package !== packageFilter) return false;
+          if (classFilter && item.className !== classFilter) return false;
+          if (searchTerm && !item.searchText.includes(searchTerm)) return false;
+          return true;
+        });
+        this.selectedIndex = -1;
+        this.renderResults();
+        this.updateResultsInfo();
+      }
+      renderResults() {
+        if (this.filteredData.length === 0) {
+          this.showNoResults();
+          return;
+        }
+        const maxResults = 200;
+        const resultsToShow = this.filteredData.slice(0, maxResults);
+        this.resultsContainer.innerHTML = '';
+        resultsToShow.forEach((item, index) => {
+          const element = this.createResultElement(item, index);
+          this.resultsContainer.appendChild(element);
+        });
+        if (this.filteredData.length > maxResults) {
+          const moreElement = document.createElement('div');
+          moreElement.className = 'result-item';
+          moreElement.innerHTML = `
+            <div class="result-header">
+              <span class="result-name">... and ${this.filteredData.length - maxResults} more results</span>
             </div>
-            <div class="func-hoverbox">
-              <div class="func-hover-title">${title}</div>
-              <div class="func-hover-type">${typeTag(type)} ${type.charAt(0).toUpperCase()+type.slice(1)}</div>
-              ${signature?`<div class="func-hover-syntax">${signature}</div>`:""}
-              ${classname?`<div class="func-hover-class">${classname}</div>`:""}
-              <div style="margin-top:7px;"><a href="${url}" target="_blank" style="color:#4285f4;text-decoration:underline;">Go to documentation</a></div>
-            </div>
-          </a>
+            <div class="result-description">Refine your search to see more specific results</div>
+          `;
+          this.resultsContainer.appendChild(moreElement);
+        }
+      }
+      createResultElement(item, index) {
+        const element = document.createElement('div');
+        element.className = 'result-item';
+        element.dataset.index = index;
+        const searchTerm = this.searchInput.value.trim();
+        const highlightedName = this.highlightText(item.name, searchTerm);
+        const highlightedSignature = this.highlightText(item.signature, searchTerm);
+        element.innerHTML = `
+          <div class="result-header">
+            <span class="result-type type-${item.type}">${item.type}</span>
+            <span class="result-name">${highlightedName}</span>
+            <span class="result-class">${item.className}</span>
+          </div>
+          ${item.signature ? `<div class="result-signature">${highlightedSignature}</div>` : ''}
+          <div class="result-description">${this.highlightText(item.description, searchTerm)}</div>
+          <div class="result-package">${item.package}</div>
         `;
-        // Mouseover for hoverbox
-        li.onmouseover = () => { selIdx=i; li.classList.add('selected'); };
-        li.onmouseout = () => { li.classList.remove('selected'); };
-        // Accessibility: focus within
-        li.querySelector('.result-link').onfocus = () => { selIdx = i; li.classList.add('selected'); };
-        li.querySelector('.result-link').onblur = () => { li.classList.remove('selected'); };
-        ul.appendChild(li);
-      });
-    }
-
-    // --- Index Building ---
-    async function buildIndex() {
-      index = []; urls = [];
-      let htmlFiles = await findAllHtmlFiles();
-      let total = htmlFiles.length, done = 0;
-      $('progress').style.display='block';
-      $('progress-bar').style.width='0%';
-      for(const file of htmlFiles){
-        try{
-          let resp = await fetch(file);
-          if(!resp.ok) continue;
-          let txt = await resp.text();
-          extractFunctions(txt, file);
-        }catch{}
-        done++;
-        $('progress-bar').style.width = ((done/total)*100).toFixed(1)+'%';
+        element.addEventListener('click', () => this.openResult(item));
+        element.addEventListener('mouseenter', () => this.setSelectedIndex(index));
+        return element;
       }
-      $('progress').style.display='none';
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(index));
-      localStorage.setItem(INDEX_URLS_KEY, JSON.stringify(htmlFiles));
-      fuse = null;
-      performSearch($('search-bar').value);
-    }
-
-    function extractFunctions(html, file) {
-      let parser = new DOMParser();
-      let doc = parser.parseFromString(html, "text/html");
-      let h4s = doc.querySelectorAll('h4');
-      h4s.forEach(h4=>{
-        let title = h4.textContent.trim();
-        let pre = h4.nextElementSibling;
-        let signature = '';
-        if(pre && pre.tagName==='PRE') signature = pre.textContent.trim();
-        let cls = '';
-        let bc = doc.querySelector('.header .subTitle')||doc.querySelector('.header .title')||doc.querySelector('title');
-        if(bc) cls = bc.textContent.trim();
-        let anchor = h4.getAttribute('id') || h4.previousElementSibling?.getAttribute('name');
-        let url = file+(anchor?('#'+anchor):'');
-        if(title.match(/^[A-Z][A-Za-z0-9_]*$/)) return;
-        index.push({title, signature, classname:cls, url});
-      });
-    }
-
-    async function findAllHtmlFiles() {
-      try {
-        let resp = await fetch('allclasses-noframe.html');
-        if (resp.ok) {
-          let html = await resp.text();
-          let parser = new DOMParser();
-          let doc = parser.parseFromString(html, "text/html");
-          let links = [...doc.querySelectorAll('a[href$=".html"]')];
-          let files = Array.from(new Set(links.map(a => a.getAttribute('href'))));
-          files = files.map(f => f.replace(/#.*$/, ''));
-          files = files.filter(f => f && f.endsWith('.html'));
-          return files;
-        }
-      } catch (e) {}
-      let files = [];
-      files.push('index.html');
-      for(let i=0;i<100;i++) files.push('index-files/index-'+i+'.html');
-      for(let prefix of ['com/intellinum/mia/app/ui/','com/intellinum/mia/app/event/','com/intellinum/mia/app/runtime/']) {
-        for(let file of ['Table.html','TableRow.html','LOVField.html','Session.html']) {
-          files.push(prefix+file);
+      highlightText(text, searchTerm) {
+        if (!searchTerm || !text) return text;
+        const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        return text.replace(regex, '<span class="highlight">$1</span>');
+      }
+      showNoResults() {
+        this.resultsContainer.innerHTML = `
+          <div class="no-results">
+            <svg class="no-results-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+            <h3>No results found</h3>
+            <p>Try adjusting your search terms or filters</p>
+          </div>
+        `;
+      }
+      showError(message) {
+        this.resultsContainer.innerHTML = `
+          <div class="no-results">
+            <h3>Error</h3>
+            <p>${message}</p>
+          </div>
+        `;
+      }
+      updateResultsInfo() {
+        const total = this.data.length;
+        const filtered = this.filteredData.length;
+        this.resultsCount.textContent = `${filtered} of ${total} items`;
+        if (filtered === total) {
+          this.resultsInfo.textContent = `Showing all ${total} items`;
+        } else {
+          this.resultsInfo.textContent = `Showing ${filtered} of ${total} items`;
         }
       }
-      return files;
-    }
-
-    async function loadIndex() {
-      let saved = localStorage.getItem(STORAGE_KEY);
-      let savedUrls = localStorage.getItem(INDEX_URLS_KEY);
-      if(saved && savedUrls) {
-        index = JSON.parse(saved);
-        urls = JSON.parse(savedUrls);
-        fuse = null;
-        performSearch('');
-      } else {
-        $('msg').innerHTML = "Indexing JavaDoc files&hellip; Please wait.";
-        await buildIndex();
-        $('msg').innerHTML = "";
+      clearAllFilters() {
+        this.searchInput.value = '';
+        this.packageFilter.value = '';
+        this.classFilter.value = '';
+        this.updateClassFilter();
+        this.applyFilters();
+        this.searchInput.focus();
+      }
+      handleKeyNavigation(e) {
+        const maxIndex = Math.min(this.filteredData.length - 1, 199);
+        switch (e.key) {
+          case 'ArrowDown':
+            e.preventDefault();
+            this.setSelectedIndex(Math.min(this.selectedIndex + 1, maxIndex));
+            break;
+          case 'ArrowUp':
+            e.preventDefault();
+            this.setSelectedIndex(Math.max(this.selectedIndex - 1, -1));
+            break;
+          case 'Enter':
+            e.preventDefault();
+            if (this.selectedIndex >= 0 && this.selectedIndex < this.filteredData.length) {
+              this.openResult(this.filteredData[this.selectedIndex]);
+            }
+            break;
+          case 'Escape':
+            this.setSelectedIndex(-1);
+            break;
+        }
+      }
+      handleGlobalKeys(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+          e.preventDefault();
+          this.searchInput.focus();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'K') {
+          e.preventDefault();
+          this.clearAllFilters();
+        }
+      }
+      setSelectedIndex(index) {
+        const previousSelected = this.resultsContainer.querySelector('.result-item.selected');
+        if (previousSelected) {
+          previousSelected.classList.remove('selected');
+        }
+        this.selectedIndex = index;
+        if (index >= 0) {
+          const newSelected = this.resultsContainer.querySelector(`[data-index="${index}"]`);
+          if (newSelected) {
+            newSelected.classList.add('selected');
+            newSelected.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          }
+        }
+      }
+      openResult(item) {
+        window.open(item.url, '_blank', 'noopener,noreferrer');
       }
     }
-    loadIndex();
-
-    document.addEventListener('keydown', e=>{
-      if(e.ctrlKey && e.key==='r') {
-        if(confirm("Rebuild index?")) buildIndex();
-      }
+    document.addEventListener('DOMContentLoaded', () => {
+      new JavaDocExplorer();
     });
   </script>
 </body>
