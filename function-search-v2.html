@@ -2,611 +2,404 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JavaDoc Explorer • Advanced Search</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>JavaDoc Search</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      /* Light theme */
-      --bg-primary: #fafbfc;
-      --bg-secondary: #ffffff;
-      --bg-tertiary: #f8fafc;
-      --bg-glass: rgba(255, 255, 255, 0.85);
-      --bg-overlay: rgba(0, 0, 0, 0.02);
-      
-      --text-primary: #0f172a;
-      --text-secondary: #475569;
-      --text-tertiary: #64748b;
-      --text-accent: #1e40af;
-      
-      --border-primary: #e2e8f0;
-      --border-secondary: #cbd5e1;
+      --bg: #ffffff;
+      --fg: #1f2937;
+      --fg-muted: #6b7280;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --secondary: #f3f4f6;
+      --border: #e5e7eb;
       --border-focus: #3b82f6;
-      
-      --accent-primary: #3b82f6;
-      --accent-secondary: #1d4ed8;
-      --accent-success: #10b981;
-      --accent-warning: #f59e0b;
-      --accent-error: #ef4444;
-      
-      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
       --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-      
-      --radius-sm: 6px;
-      --radius-md: 8px;
+      --radius: 8px;
       --radius-lg: 12px;
-      --radius-xl: 16px;
-      
       --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     }
-
     .dark {
-      --bg-primary: #0f172a;
-      --bg-secondary: #1e293b;
-      --bg-tertiary: #334155;
-      --bg-glass: rgba(30, 41, 59, 0.85);
-      --bg-overlay: rgba(255, 255, 255, 0.02);
-      
-      --text-primary: #f8fafc;
-      --text-secondary: #cbd5e1;
-      --text-tertiary: #94a3b8;
-      --text-accent: #60a5fa;
-      
-      --border-primary: #334155;
-      --border-secondary: #475569;
+      --bg: #111827;
+      --fg: #f9fafb;
+      --fg-muted: #9ca3af;
+      --secondary: #1f2937;
+      --border: #374151;
       --border-focus: #60a5fa;
-      
-      --accent-primary: #60a5fa;
-      --accent-secondary: #3b82f6;
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; }
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      line-height: 1.6;
+      background: var(--bg);
+      color: var(--fg);
+      margin: 0;
+      padding: 0;
       min-height: 100vh;
-      transition: var(--transition);
+      line-height: 1.6;
     }
-
-    /* Header */
-    .header {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      background: var(--bg-glass);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border-primary);
-      padding: 1rem 0;
-    }
-
-    .header-content {
-      max-width: 1400px;
+    .container {
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 0 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      padding: 2rem 1rem;
     }
-
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
     .logo {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .logo-icon {
-      width: 2.5rem;
-      height: 2.5rem;
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-      border-radius: var(--radius-md);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
+      font-size: 2.5rem;
       font-weight: 700;
-      font-size: 1.25rem;
-    }
-
-    .logo-text {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--text-primary);
+      color: var(--primary);
+      margin-bottom: 0;
       letter-spacing: -0.025em;
     }
-
-    .logo-subtitle {
-      font-size: 0.875rem;
-      color: var(--text-tertiary);
-      font-weight: 500;
-      margin-left: 0.5rem;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .theme-toggle {
-      width: 2.5rem;
-      height: 2.5rem;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border-primary);
-      background: var(--bg-secondary);
-      color: var(--text-secondary);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: var(--transition);
-    }
-
-    .theme-toggle:hover {
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-md);
-    }
-
-    /* Main Container */
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 2rem;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 2rem;
-    }
-
-    /* Search Section */
-    .search-section {
-      background: var(--bg-secondary);
-      border-radius: var(--radius-xl);
-      padding: 2rem;
-      box-shadow: var(--shadow-lg);
-      border: 1px solid var(--border-primary);
-    }
-
-    .search-header {
+    .subtitle {
+      color: var(--fg-muted);
+      font-size: 1.1rem;
       margin-bottom: 2rem;
     }
-
-    .search-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 0.5rem;
+    .search-section {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
     }
-
-    .search-description {
-      color: var(--text-secondary);
-      font-size: 0.875rem;
-    }
-
     .search-bar {
       position: relative;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
-
     .search-input {
       width: 100%;
-      padding: 1rem 1rem 1rem 3rem;
+      padding: 0.75rem 1rem 0.75rem 3rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
       font-size: 1rem;
-      border: 2px solid var(--border-primary);
-      border-radius: var(--radius-lg);
-      background: var(--bg-primary);
-      color: var(--text-primary);
+      background: var(--bg);
+      color: var(--fg);
       transition: var(--transition);
-      font-family: inherit;
     }
-
     .search-input:focus {
       outline: none;
       border-color: var(--border-focus);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
     }
-
     .search-icon {
       position: absolute;
       left: 1rem;
       top: 50%;
       transform: translateY(-50%);
-      color: var(--text-tertiary);
+      color: var(--fg-muted);
       width: 1.25rem;
       height: 1.25rem;
     }
-
     .filters {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 1.5rem;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
     }
-
+    @media (max-width: 768px) {
+      .filters {
+        grid-template-columns: 1fr;
+      }
+    }
     .filter-group {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
     }
-
     .filter-label {
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: var(--fg);
       font-size: 0.875rem;
-      font-weight: 600;
-      color: var(--text-secondary);
     }
-
     .filter-select {
-      padding: 0.75rem;
-      border: 1px solid var(--border-primary);
-      border-radius: var(--radius-md);
-      background: var(--bg-primary);
-      color: var(--text-primary);
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      color: var(--fg);
       font-size: 0.875rem;
-      font-family: inherit;
       transition: var(--transition);
     }
-
     .filter-select:focus {
       outline: none;
       border-color: var(--border-focus);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
     }
-
-    .search-stats {
+    .filter-stats {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-top: 1.5rem;
-      border-top: 1px solid var(--border-primary);
+      padding: 0.75rem 0;
+      border-top: 1px solid var(--border);
+      margin-top: 1rem;
       font-size: 0.875rem;
-      color: var(--text-secondary);
+      color: var(--fg-muted);
     }
-
     .clear-filters {
       background: none;
-      border: 1px solid var(--border-primary);
-      color: var(--text-secondary);
-      padding: 0.5rem 1rem;
-      border-radius: var(--radius-md);
-      font-size: 0.875rem;
+      border: 1px solid var(--border);
+      color: var(--fg-muted);
+      padding: 0.25rem 0.75rem;
+      border-radius: var(--radius);
+      font-size: 0.75rem;
       cursor: pointer;
       transition: var(--transition);
-      font-family: inherit;
     }
-
     .clear-filters:hover {
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
+      background: var(--secondary);
+      color: var(--fg);
     }
-
-    /* Results Section */
     .results-section {
-      background: var(--bg-secondary);
-      border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-lg);
-      border: 1px solid var(--border-primary);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
       overflow: hidden;
+      box-shadow: var(--shadow);
     }
-
     .results-header {
-      padding: 1.5rem 2rem;
-      background: var(--bg-tertiary);
-      border-bottom: 1px solid var(--border-primary);
+      padding: 1rem 1.5rem;
+      background: var(--secondary);
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-
-    .results-title {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
     .results-count {
+      color: var(--fg-muted);
+      font-weight: 400;
       font-size: 0.875rem;
-      color: var(--text-secondary);
-      background: var(--bg-secondary);
-      padding: 0.25rem 0.75rem;
-      border-radius: var(--radius-sm);
     }
-
     .results-container {
       max-height: 70vh;
       overflow-y: auto;
-      padding: 1rem;
     }
-
     .result-item {
-      background: var(--bg-primary);
-      border: 1px solid var(--border-primary);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem;
-      margin-bottom: 1rem;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
       cursor: pointer;
       transition: var(--transition);
       position: relative;
     }
-
-    .result-item:hover,
-    .result-item.selected {
-      background: var(--bg-glass);
-      border-color: var(--border-focus);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-xl);
+    .result-item:hover, .result-item.selected {
+      background: var(--secondary);
     }
-
     .result-item:last-child {
-      margin-bottom: 0;
+      border-bottom: none;
     }
-
     .result-header {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      margin-bottom: 1rem;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
     }
-
     .result-type {
       display: inline-flex;
       align-items: center;
-      padding: 0.25rem 0.75rem;
-      border-radius: var(--radius-sm);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
       font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      background: rgba(16, 185, 129, 0.1);
-      color: var(--accent-success);
-    }
-
-    .result-name {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: var(--text-accent);
-    }
-
-    .result-class {
-      margin-left: auto;
-      font-size: 0.875rem;
-      color: var(--text-secondary);
       font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
     }
-
+    .type-class { background: #dbeafe; color: #1e40af; }
+    .type-method { background: #dcfce7; color: #166534; }
+    .type-field { background: #fef3c7; color: #92400e; }
+    .type-constructor { background: #fce7f3; color: #be185d; }
+    .type-enum { background: #e0e7ff; color: #3730a3; }
+    .dark .type-class { background: #1e3a8a; color: #93c5fd; }
+    .dark .type-method { background: #14532d; color: #86efac; }
+    .dark .type-field { background: #451a03; color: #fbbf24; }
+    .dark .type-constructor { background: #831843; color: #f9a8d4; }
+    .dark .type-enum { background: #312e81; color: #a5b4fc; }
+    .result-name {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--fg);
+    }
+    .result-class {
+      color: var(--primary);
+      font-size: 0.875rem;
+      margin-left: auto;
+    }
     .result-signature {
-      font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace;
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
       font-size: 0.875rem;
-      color: var(--text-tertiary);
-      background: var(--bg-overlay);
-      padding: 0.75rem;
-      border-radius: var(--radius-md);
-      margin-bottom: 1rem;
+      color: var(--fg-muted);
+      background: var(--secondary);
+      padding: 0.5rem;
+      border-radius: var(--radius);
+      margin: 0.5rem 0;
       overflow-x: auto;
-      border: 1px solid var(--border-primary);
     }
-
     .result-description {
-      color: var(--text-secondary);
+      color: var(--fg-muted);
       font-size: 0.875rem;
-      line-height: 1.6;
-      margin-bottom: 0.75rem;
+      line-height: 1.5;
     }
-
     .result-package {
       font-size: 0.75rem;
-      color: var(--text-tertiary);
-      font-weight: 500;
+      color: var(--fg-muted);
+      margin-top: 0.25rem;
     }
-
-    .highlight {
-      background: rgba(59, 130, 246, 0.2);
-      color: var(--accent-primary);
-      padding: 0.125rem 0.25rem;
-      border-radius: 3px;
-      font-weight: 600;
-    }
-
-    /* Loading States */
-    .loading,
-    .no-results,
-    .error {
+    .loading {
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 4rem 2rem;
-      text-align: center;
-      color: var(--text-secondary);
+      padding: 3rem;
+      color: var(--fg-muted);
     }
-
     .loading-spinner {
-      width: 3rem;
-      height: 3rem;
-      border: 3px solid var(--border-primary);
-      border-top: 3px solid var(--accent-primary);
+      width: 2rem;
+      height: 2rem;
+      border: 2px solid var(--border);
+      border-top: 2px solid var(--primary);
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      margin-bottom: 1rem;
+      margin-right: 1rem;
     }
-
-    .loading-text {
-      font-size: 1.125rem;
-      font-weight: 500;
-      margin-bottom: 0.5rem;
-    }
-
-    .loading-progress {
-      font-size: 0.875rem;
-      color: var(--text-tertiary);
-    }
-
-    .no-results-icon {
-      width: 4rem;
-      height: 4rem;
-      margin-bottom: 1rem;
-      opacity: 0.5;
-    }
-
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .container {
-        padding: 1rem;
-        gap: 1rem;
-      }
-
-      .header-content {
-        padding: 0 1rem;
-      }
-
-      .logo-text {
-        font-size: 1.25rem;
-      }
-
-      .logo-subtitle {
-        display: none;
-      }
-
-      .search-section,
-      .results-section {
-        padding: 1.5rem;
-      }
-
-      .filters {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-      }
-
-      .search-stats {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: flex-start;
-      }
-
-      .result-item {
-        padding: 1rem;
-      }
-
-      .result-header {
-        flex-wrap: wrap;
-        gap: 0.5rem;
-      }
-
-      .result-class {
-        margin-left: 0;
-        order: -1;
-        width: 100%;
-      }
+    .no-results {
+      text-align: center;
+      padding: 3rem;
+      color: var(--fg-muted);
     }
-
-    /* Keyboard Navigation Hints */
+    .no-results-icon {
+      width: 4rem;
+      height: 4rem;
+      margin: 0 auto 1rem;
+      opacity: 0.5;
+    }
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.5rem;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: var(--shadow);
+    }
+    .theme-toggle:hover {
+      background: var(--secondary);
+    }
+    .highlight {
+      background: #fef08a;
+      color: #854d0e;
+      padding: 0.125rem 0.25rem;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+    .dark .highlight {
+      background: #451a03;
+      color: #fbbf24;
+    }
     .keyboard-hint {
       position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-primary);
-      border-radius: var(--radius-md);
-      padding: 0.75rem 1rem;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.5rem 1rem;
       font-size: 0.75rem;
-      color: var(--text-secondary);
-      box-shadow: var(--shadow-lg);
-      opacity: 0;
-      transform: translateY(1rem);
-      transition: var(--transition);
-      pointer-events: none;
+      color: var(--fg-muted);
+      box-shadow: var(--shadow);
+      display: none;
     }
-
     .keyboard-hint.show {
-      opacity: 1;
-      transform: translateY(0);
+      display: block;
     }
-
     .kbd {
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-primary);
+      background: var(--secondary);
+      border: 1px solid var(--border);
       border-radius: 3px;
       padding: 0.125rem 0.25rem;
       font-size: 0.75rem;
       font-family: monospace;
     }
-
-    /* Progress Bar */
-    .progress-bar {
-      width: 100%;
-      height: 4px;
-      background: var(--border-primary);
-      border-radius: 2px;
-      overflow: hidden;
-      margin: 1rem 0;
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      .logo { font-size: 2rem; }
+      .filter-stats {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+      }
+      .result-header { flex-wrap: wrap; }
+      .result-class { margin-left: 0; margin-top: 0.25rem; }
     }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
-      border-radius: 2px;
-      transition: width 0.3s ease;
-      width: 0%;
+    .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .company-logo {
+      height: 3rem;
+      width: auto;
+      max-width: 3rem;
+      object-fit: contain;
+    }
+    @media (max-width: 768px) {
+      .logo-container {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .company-logo {
+        height: 2.5rem;
+        max-width: 2.5rem;
+      }
     }
   </style>
 </head>
 <body>
-  <header class="header">
-    <div class="header-content">
-      <div class="logo">
-        <div class="logo-icon">J</div>
-        <div>
-          <div class="logo-text">JavaDoc Explorer</div>
-          <div class="logo-subtitle">Advanced Method Search</div>
-        </div>
+  <button class="theme-toggle" id="theme-toggle" title="Toggle theme">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="5"/>
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+    </svg>
+  </button>
+  <div class="container">
+    <div class="header">
+      <div class="logo-container">
+        
+        <h1 class="logo">JavaDoc Explorer</h1>
       </div>
-      <div class="header-actions">
-        <button class="theme-toggle" id="theme-toggle" title="Toggle theme">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="5"/>
-            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-          </svg>
-        </button>
-      </div>
+      <p class="subtitle">Search through packages, classes, and methods</p>
     </div>
-  </header>
-
-  <main class="container">
-    <section class="search-section">
-      <div class="search-header">
-        <h2 class="search-title">Search Methods</h2>
-        <p class="search-description">Find methods across your JavaDoc documentation</p>
-      </div>
-
+    <div class="search-section">
       <div class="search-bar">
         <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="8"/>
           <path d="m21 21-4.35-4.35"/>
         </svg>
-        <input 
-          type="text" 
-          class="search-input" 
+        <input
+          type="text"
+          class="search-input"
           id="search-input"
-          placeholder="Search for methods... (e.g., 'getText', 'setVisible', 'onClick')"
+          placeholder="Search for classes, methods, fields... (e.g., 'Button', 'getText', 'setVisible')"
           autocomplete="off"
           spellcheck="false"
         >
       </div>
-
       <div class="filters">
         <div class="filter-group">
           <label class="filter-label" for="package-filter">Package</label>
@@ -614,7 +407,6 @@
             <option value="">All Packages</option>
           </select>
         </div>
-        
         <div class="filter-group">
           <label class="filter-label" for="class-filter">Class</label>
           <select class="filter-select" id="class-filter">
@@ -622,35 +414,27 @@
           </select>
         </div>
       </div>
-
-      <div class="search-stats">
-        <span id="results-info">Ready to search</span>
-        <button class="clear-filters" id="clear-filters">Clear Filters</button>
+      <div class="filter-stats">
+        <span id="results-info">Loading...</span>
+        <button class="clear-filters" id="clear-filters">Clear All Filters</button>
       </div>
-    </section>
-
-    <section class="results-section">
+    </div>
+    <div class="results-section">
       <div class="results-header">
-        <h3 class="results-title">Method Results</h3>
-        <span class="results-count" id="results-count">0 methods</span>
+        <span>Search Results</span>
+        <span class="results-count" id="results-count">0 items</span>
       </div>
       <div class="results-container" id="results-container">
         <div class="loading">
           <div class="loading-spinner"></div>
-          <div class="loading-text">Loading JavaDoc Data</div>
-          <div class="loading-progress" id="loading-progress">Initializing...</div>
-          <div class="progress-bar">
-            <div class="progress-fill" id="progress-fill"></div>
-          </div>
+          <span>Loading JavaDoc data...</span>
         </div>
       </div>
-    </section>
-  </main>
-
+    </div>
+  </div>
   <div class="keyboard-hint" id="keyboard-hint">
     Use <span class="kbd">↑</span> <span class="kbd">↓</span> to navigate, <span class="kbd">Enter</span> to open, <span class="kbd">Esc</span> to clear selection
   </div>
-
   <script>
     class JavaDocExplorer {
       constructor() {
@@ -658,7 +442,7 @@
         this.filteredData = [];
         this.selectedIndex = -1;
         this.isLoading = true;
-        
+
         this.searchInput = document.getElementById('search-input');
         this.packageFilter = document.getElementById('package-filter');
         this.classFilter = document.getElementById('class-filter');
@@ -667,9 +451,7 @@
         this.resultsInfo = document.getElementById('results-info');
         this.clearFiltersBtn = document.getElementById('clear-filters');
         this.keyboardHint = document.getElementById('keyboard-hint');
-        this.loadingProgress = document.getElementById('loading-progress');
-        this.progressFill = document.getElementById('progress-fill');
-        
+
         this.init();
       }
 
@@ -678,6 +460,7 @@
         this.setupTheme();
         await this.loadData();
         this.populateFilters();
+        this.applyFilters();
         this.isLoading = false;
       }
 
@@ -686,14 +469,11 @@
         this.searchInput.addEventListener('input', () => this.applyFilters());
         this.packageFilter.addEventListener('change', () => this.onPackageChange());
         this.classFilter.addEventListener('change', () => this.applyFilters());
-        
         // Clear filters
         this.clearFiltersBtn.addEventListener('click', () => this.clearAllFilters());
-        
         // Keyboard navigation
         this.searchInput.addEventListener('keydown', (e) => this.handleKeyNavigation(e));
         document.addEventListener('keydown', (e) => this.handleGlobalKeys(e));
-        
         // Show keyboard hints on focus
         this.searchInput.addEventListener('focus', () => {
           this.keyboardHint.classList.add('show');
@@ -704,11 +484,9 @@
       setupTheme() {
         const themeToggle = document.getElementById('theme-toggle');
         const savedTheme = localStorage.getItem('javadoc-theme') || 'light';
-        
         if (savedTheme === 'dark') {
           document.body.classList.add('dark');
         }
-        
         themeToggle.addEventListener('click', () => {
           document.body.classList.toggle('dark');
           const isDark = document.body.classList.contains('dark');
@@ -718,82 +496,50 @@
 
       async loadData() {
         try {
-          this.updateLoadingStatus('Scanning documentation files...', 0);
-          
           const files = await this.getJavaDocFiles();
           let processed = 0;
-          let successful = 0;
-          let failed = 0;
-          
-          this.updateLoadingStatus(`Found ${files.length} documentation files`, 5);
-          
+
           for (const file of files) {
             try {
-              this.updateLoadingStatus(`Loading ${file.className}...`, 5 + (processed / files.length) * 85);
-              
               const response = await fetch(file.path);
               if (response.ok) {
                 const html = await response.text();
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
-                
                 const classData = this.parseClassFile(doc, file);
                 if (classData && classData.length > 0) {
                   this.data.push(...classData);
-                  successful++;
                 }
-              } else {
-                failed++;
-                console.warn(`Failed to load ${file.path}: ${response.status}`);
               }
             } catch (error) {
-              failed++;
               console.warn(`Failed to load ${file.path}:`, error);
             }
-            
             processed++;
+            this.updateLoadingProgress(processed, files.length);
           }
-          
-          this.updateLoadingStatus('Processing documentation...', 90);
-          
           // Sort data for better user experience
-          this.data.sort((a, b) => a.name.localeCompare(b.name));
-          
-          this.updateLoadingStatus('Ready!', 100);
-          
-          // Initialize filtered data with all data
-          this.filteredData = [...this.data];
-          
-          // Render initial results immediately after loading
-          setTimeout(() => {
-            this.renderResults();
-            this.updateResultsInfo();
-          }, 500);
-          
-          console.log(`Loaded ${this.data.length} methods from ${successful} files (${failed} failed)`);
-          
+          this.data.sort((a, b) => {
+            if (a.type !== b.type) {
+              const typeOrder = { method: 0, field: 1 };
+              return (typeOrder[a.type] || 5) - (typeOrder[b.type] || 5);
+            }
+            return a.name.localeCompare(b.name);
+          });
+          // Show all results after loading
+          this.filteredData = this.data.slice();
+          this.renderResults();
+          this.updateResultsInfo();
+          this.isLoading = false;
         } catch (error) {
           console.error('Failed to load JavaDoc data:', error);
-          this.showError('Failed to load JavaDoc data. Please check that the HTML files are accessible.');
-        }
-      }
-
-      updateLoadingStatus(message, percentage) {
-        if (this.loadingProgress) {
-          this.loadingProgress.textContent = message;
-        }
-        
-        if (this.progressFill) {
-          this.progressFill.style.width = `${Math.min(percentage, 100)}%`;
-        }
-        
-        if (this.resultsInfo) {
-          this.resultsInfo.textContent = `${message} (${Math.round(percentage)}%)`;
+          this.showError('Failed to load JavaDoc data. Please refresh the page.');
         }
       }
 
       async getJavaDocFiles() {
+        // ... same, unchanged ...
         const classNames = {
+          // ...class name lists...
           'com/intellinum/mia/app/action': ['Action', 'ActionType', 'ClientAction', 'DumpSql'],
           'com/intellinum/mia/app/device': ['DeviceInfo', 'DeviceType'],
           'com/intellinum/mia/app/event': ['ApplicationEventListener', 'ButtonEventListener', 'CheckBoxEventListener', 'ComboEventListener', 'ComponentEventListener', 'ContainerEventListener', 'Event', 'EventListener', 'ListItemEventListener', 'LOVEventListener', 'PageEventListener', 'PreventDefaultException', 'TableSelectionEventListener', 'TextInputEventListener'],
@@ -818,7 +564,6 @@
           'com/intellinum/mia/app/util/webservice': ['RestWebService', 'SoapWebService', 'WebService'],
           'com/intellinum/mia/app/util/worker': ['FlexiBackgroundWorkerThread', 'FlexiTask', 'TaskState']
         };
-
         const files = [];
         for (const pkg in classNames) {
           const classes = classNames[pkg];
@@ -830,92 +575,75 @@
             });
           }
         }
-        
         return files;
       }
 
+      // Only add methods and fields to the search index.
       parseClassFile(doc, file) {
         const items = [];
         const packageName = file.package;
         const className = file.className;
-        
-        // Parse methods only
         this.parseMethods(doc, items, className, packageName, file.path);
-
+        this.parseFields(doc, items, className, packageName, file.path);
         return items;
       }
-
       parseMethods(doc, items, className, packageName, basePath) {
         const selectors = [
           '.methodSummary table tr',
-          '.methodSummary .memberSummary tr', 
+          '.methodSummary .memberSummary tr',
           '.method-summary tr',
-          'table.methodSummary tr',
           '.summary .method tr',
-          '.memberSummary tr'
+          'table.memberSummary tr'
         ];
-        
         this.parseMembers(doc, selectors, 'method', items, className, packageName, basePath);
+      }
+      parseFields(doc, items, className, packageName, basePath) {
+        const selectors = [
+          '.fieldSummary table tr',
+          '.fieldSummary .memberSummary tr',
+          '.field-summary tr',
+          '.summary .field tr'
+        ];
+        this.parseMembers(doc, selectors, 'field', items, className, packageName, basePath);
       }
 
       parseMembers(doc, selectors, type, items, className, packageName, basePath) {
         for (const selector of selectors) {
           const rows = doc.querySelectorAll(selector);
-          
           rows.forEach(row => {
             const cells = row.querySelectorAll('td');
             if (cells.length < 2) return;
-            
             // Try to find the name link in different cell positions
             let nameLink = null;
             let nameCell = null;
             let typeCell = null;
-            
-            // Check each cell for a link
-            for (let i = 0; i < cells.length; i++) {
-              const links = cells[i].querySelectorAll('a');
-              for (const link of links) {
-                const linkText = link.textContent.trim();
-                if (linkText && !linkText.toLowerCase().includes('modifier') && 
-                    !linkText.toLowerCase().includes('type') &&
-                    !linkText.toLowerCase().includes('description') &&
-                    linkText.length > 0) {
-                  nameLink = link;
-                  nameCell = cells[i];
-                  typeCell = cells[0];
-                  break;
-                }
+            for (let i = cells.length - 1; i >= 0; i--) {
+              const link = cells[i].querySelector('a');
+              if (link && link.textContent.trim()) {
+                nameLink = link;
+                nameCell = cells[i];
+                typeCell = cells[0];
+                break;
               }
-              if (nameLink) break;
             }
-            
             if (!nameLink) return;
-            
             const memberName = nameLink.textContent.trim();
             if (!memberName || memberName.length < 1) return;
-            
-            // Skip table headers and common non-member entries
-            const lowerName = memberName.toLowerCase();
-            if (lowerName.includes('modifier') || 
-                lowerName.includes('type') ||
-                lowerName.includes('description') ||
-                lowerName.includes('field') ||
-                lowerName.includes('method')) {
+            // Skip table headers
+            if (memberName.toLowerCase().includes('modifier') ||
+                memberName.toLowerCase().includes('type') ||
+                memberName.toLowerCase().includes('description')) {
               return;
             }
-            
-            // Extract signature
+            // Extract signature from multiple sources
             let signature = this.extractSignature(nameCell, typeCell, memberName, type);
-            
             // Extract description
-            const description = this.extractMemberDescription(row, memberName, type, className);
-            
+            const description = this.extractMemberDescription(nameCell, memberName, type, className);
             // Build URL
             const memberUrl = this.resolveUrl(nameLink.getAttribute('href'), basePath);
-            
             // Create search text
             const searchText = `${memberName} ${signature} ${description} ${className} ${packageName} ${type}`.toLowerCase();
-            
+
             items.push({
               type: type,
               name: memberName,
@@ -929,9 +657,7 @@
           });
         }
       }
-
       extractSignature(nameCell, typeCell, memberName, type) {
-        // Try to extract signature from code elements
         const codeElements = nameCell.querySelectorAll('code');
         for (const code of codeElements) {
           const text = this.cleanSignature(code.textContent || code.innerText);
@@ -939,91 +665,76 @@
             return text;
           }
         }
-        
-        // Try to extract from the entire cell
         const cellText = this.cleanSignature(nameCell.textContent || nameCell.innerText);
         if (cellText && cellText.includes(memberName)) {
           return cellText;
         }
-        
-        // Try to extract from type cell if available
         if (typeCell) {
           const typeText = this.extractText(typeCell);
-          if (typeText && !typeText.toLowerCase().includes('modifier')) {
+          if (typeText) {
             return `${typeText} ${memberName}`;
           }
         }
-        
-        // Default signature for methods
-        return `${memberName}()`;
-      }
-
-      extractMemberDescription(row, memberName, type, className) {
-        const cells = row.querySelectorAll('td');
-        
-        // Look for description in the last cell or cells with substantial text
-        for (let i = cells.length - 1; i >= 0; i--) {
-          const cell = cells[i];
-          const text = this.extractText(cell);
-          
-          // Skip cells that only contain the member name or type info
-          if (text && text.length > 10 && 
-              !text.toLowerCase().includes(memberName.toLowerCase()) &&
-              !text.toLowerCase().includes('modifier') &&
-              !text.toLowerCase().includes('type')) {
-            return text;
-          }
+        switch (type) {
+          case 'method':
+            return `${memberName}()`;
+          case 'field':
+            return `${memberName}`;
+          default:
+            return memberName;
         }
-        
-        // Try to find description in nested elements
-        const descSelectors = ['.description', '.block', '.summary'];
+      }
+      extractMemberDescription(nameCell, memberName, type, className) {
+        const descSelectors = [
+          '.description',
+          '.block',
+          '.summary',
+          'div:last-child'
+        ];
         for (const selector of descSelectors) {
-          const descElement = row.querySelector(selector);
+          const descElement = nameCell.querySelector(selector);
           if (descElement) {
             const text = this.extractText(descElement);
-            if (text && text.length > 5) {
+            if (text && text.length > 5 && !text.includes(memberName)) {
               return text;
             }
           }
         }
-        
-        // Default description
-        return `${memberName} method of ${className}`;
+        let nextElement = nameCell.nextElementSibling;
+        while (nextElement) {
+          const text = this.extractText(nextElement);
+          if (text && text.length > 10) {
+            return text;
+          }
+          nextElement = nextElement.nextElementSibling;
+        }
+        return `${memberName} ${type} of ${className}`;
       }
-
       extractText(element) {
         if (!element) return '';
-        
-        // Get text content and clean it up
         let text = element.textContent || element.innerText || '';
-        
-        // Remove extra whitespace and newlines
         text = text.replace(/\s+/g, ' ').trim();
-        
-        // Remove common JavaDoc artifacts
         text = text.replace(/^\s*\n\s*/, '').replace(/\s*\n\s*$/, '');
-        
         return text;
       }
-
       cleanSignature(signature) {
         if (!signature) return '';
-        
         return signature
           .replace(/\s+/g, ' ')
           .replace(/^\s*\n\s*/, '')
           .replace(/\s*\n\s*$/, '')
           .trim();
       }
-
       resolveUrl(href, basePath) {
         if (!href) return basePath;
         if (href.startsWith('http')) return href;
-        
         const baseDir = basePath.substring(0, basePath.lastIndexOf('/'));
         return href.startsWith('#') ? basePath + href : `${baseDir}/${href}`;
       }
-
+      updateLoadingProgress(current, total) {
+        const percentage = Math.round((current / total) * 100);
+        this.resultsInfo.textContent = `Loading... ${percentage}% (${current}/${total})`;
+      }
       populateFilters() {
         // Populate package filter
         const packages = [...new Set(this.data.map(item => item.package))].sort();
@@ -1034,15 +745,11 @@
           option.textContent = pkg;
           this.packageFilter.appendChild(option);
         });
-
-        // Populate class filter
         this.updateClassFilter();
       }
-
       updateClassFilter() {
         const selectedPackage = this.packageFilter.value;
         let classes;
-        
         if (selectedPackage) {
           classes = [...new Set(this.data
             .filter(item => item.package === selectedPackage)
@@ -1050,70 +757,50 @@
         } else {
           classes = [...new Set(this.data.map(item => item.className))].sort();
         }
-        
         const currentValue = this.classFilter.value;
         this.classFilter.innerHTML = '<option value="">All Classes</option>';
-        
         classes.forEach(cls => {
           const option = document.createElement('option');
           option.value = cls;
           option.textContent = cls;
           this.classFilter.appendChild(option);
         });
-        
-        // Restore selection if still valid
         if (classes.includes(currentValue)) {
           this.classFilter.value = currentValue;
         }
       }
-
       onPackageChange() {
         this.updateClassFilter();
         this.applyFilters();
       }
-
       applyFilters() {
-        if (this.isLoading || this.data.length === 0) return;
-        
+        if (this.isLoading) return;
         const searchTerm = this.searchInput.value.toLowerCase().trim();
         const packageFilter = this.packageFilter.value;
         const classFilter = this.classFilter.value;
-        
+
         this.filteredData = this.data.filter(item => {
-          // Package filter
           if (packageFilter && item.package !== packageFilter) return false;
-          
-          // Class filter
           if (classFilter && item.className !== classFilter) return false;
-          
-          // Search term (searches across all text)
           if (searchTerm && !item.searchText.includes(searchTerm)) return false;
-          
           return true;
         });
-        
         this.selectedIndex = -1;
         this.renderResults();
         this.updateResultsInfo();
       }
-
       renderResults() {
         if (this.filteredData.length === 0) {
           this.showNoResults();
           return;
         }
-        
-        // Limit results for performance
-        const maxResults = 100;
+        const maxResults = 200;
         const resultsToShow = this.filteredData.slice(0, maxResults);
-        
         this.resultsContainer.innerHTML = '';
-        
         resultsToShow.forEach((item, index) => {
           const element = this.createResultElement(item, index);
           this.resultsContainer.appendChild(element);
         });
-        
         if (this.filteredData.length > maxResults) {
           const moreElement = document.createElement('div');
           moreElement.className = 'result-item';
@@ -1126,19 +813,16 @@
           this.resultsContainer.appendChild(moreElement);
         }
       }
-
       createResultElement(item, index) {
         const element = document.createElement('div');
         element.className = 'result-item';
         element.dataset.index = index;
-        
         const searchTerm = this.searchInput.value.trim();
         const highlightedName = this.highlightText(item.name, searchTerm);
         const highlightedSignature = this.highlightText(item.signature, searchTerm);
-        
         element.innerHTML = `
           <div class="result-header">
-            <span class="result-type">method</span>
+            <span class="result-type type-${item.type}">${item.type}</span>
             <span class="result-name">${highlightedName}</span>
             <span class="result-class">${item.className}</span>
           </div>
@@ -1146,20 +830,15 @@
           <div class="result-description">${this.highlightText(item.description, searchTerm)}</div>
           <div class="result-package">${item.package}</div>
         `;
-        
         element.addEventListener('click', () => this.openResult(item));
         element.addEventListener('mouseenter', () => this.setSelectedIndex(index));
-        
         return element;
       }
-
       highlightText(text, searchTerm) {
         if (!searchTerm || !text) return text;
-        
         const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
         return text.replace(regex, '<span class="highlight">$1</span>');
       }
-
       showNoResults() {
         this.resultsContainer.innerHTML = `
           <div class="no-results">
@@ -1167,35 +846,29 @@
               <circle cx="11" cy="11" r="8"/>
               <path d="m21 21-4.35-4.35"/>
             </svg>
-            <h3>No methods found</h3>
+            <h3>No results found</h3>
             <p>Try adjusting your search terms or filters</p>
           </div>
         `;
       }
-
       showError(message) {
         this.resultsContainer.innerHTML = `
-          <div class="error">
-            <h3>Error Loading Documentation</h3>
+          <div class="no-results">
+            <h3>Error</h3>
             <p>${message}</p>
-            <p>Please ensure the JavaDoc HTML files are in the correct directory structure.</p>
           </div>
         `;
       }
-
       updateResultsInfo() {
         const total = this.data.length;
         const filtered = this.filteredData.length;
-        
-        this.resultsCount.textContent = `${filtered} of ${total} methods`;
-        
+        this.resultsCount.textContent = `${filtered} of ${total} items`;
         if (filtered === total) {
-          this.resultsInfo.textContent = `Showing all ${total} methods`;
+          this.resultsInfo.textContent = `Showing all ${total} items`;
         } else {
-          this.resultsInfo.textContent = `Showing ${filtered} of ${total} methods`;
+          this.resultsInfo.textContent = `Showing ${filtered} of ${total} items`;
         }
       }
-
       clearAllFilters() {
         this.searchInput.value = '';
         this.packageFilter.value = '';
@@ -1204,58 +877,44 @@
         this.applyFilters();
         this.searchInput.focus();
       }
-
       handleKeyNavigation(e) {
-        const maxIndex = Math.min(this.filteredData.length - 1, 99); // Account for result limit
-        
+        const maxIndex = Math.min(this.filteredData.length - 1, 199);
         switch (e.key) {
           case 'ArrowDown':
             e.preventDefault();
             this.setSelectedIndex(Math.min(this.selectedIndex + 1, maxIndex));
             break;
-            
           case 'ArrowUp':
             e.preventDefault();
             this.setSelectedIndex(Math.max(this.selectedIndex - 1, -1));
             break;
-            
           case 'Enter':
             e.preventDefault();
             if (this.selectedIndex >= 0 && this.selectedIndex < this.filteredData.length) {
               this.openResult(this.filteredData[this.selectedIndex]);
             }
             break;
-            
           case 'Escape':
             this.setSelectedIndex(-1);
             break;
         }
       }
-
       handleGlobalKeys(e) {
-        // Focus search on Ctrl/Cmd + K
         if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
           e.preventDefault();
           this.searchInput.focus();
         }
-        
-        // Clear filters on Ctrl/Cmd + Shift + K
         if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'K') {
           e.preventDefault();
           this.clearAllFilters();
         }
       }
-
       setSelectedIndex(index) {
-        // Remove previous selection
         const previousSelected = this.resultsContainer.querySelector('.result-item.selected');
         if (previousSelected) {
           previousSelected.classList.remove('selected');
         }
-        
         this.selectedIndex = index;
-        
-        // Add new selection
         if (index >= 0) {
           const newSelected = this.resultsContainer.querySelector(`[data-index="${index}"]`);
           if (newSelected) {
@@ -1264,15 +923,10 @@
           }
         }
       }
-
       openResult(item) {
-        if (item.url) {
-          window.open(item.url, '_blank', 'noopener,noreferrer');
-        }
+        window.open(item.url, '_blank', 'noopener,noreferrer');
       }
     }
-
-    // Initialize the application
     document.addEventListener('DOMContentLoaded', () => {
       new JavaDocExplorer();
     });
