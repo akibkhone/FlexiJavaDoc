@@ -278,6 +278,7 @@
       background: var(--bg-tertiary);
       color: var(--text-primary);
     }
+    /* Enhanced Dropdown Styles */
     .filters {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -288,6 +289,7 @@
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+      position: relative;
     }
     .filter-label {
       font-size: 0.875rem;
@@ -301,8 +303,13 @@
       font-size: 0.75rem;
       color: var(--accent-primary);
     }
-    .filter-select {
-      padding: 0.75rem;
+    .custom-select {
+      position: relative;
+      width: 100%;
+    }
+    .custom-select select {
+      width: 100%;
+      padding: 0.75rem 2.5rem 0.75rem 1rem;
       border: 1px solid var(--border-primary);
       border-radius: var(--radius-md);
       background: var(--bg-primary);
@@ -310,11 +317,33 @@
       font-size: 0.875rem;
       font-family: inherit;
       transition: var(--transition);
+      appearance: none;
+      cursor: pointer;
+      height: 44px;
     }
-    .filter-select:focus {
+    .custom-select select:focus {
       outline: none;
       border-color: var(--border-focus);
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    .custom-select::after {
+      content: '\f107';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-tertiary);
+      pointer-events: none;
+      transition: var(--transition);
+      font-size: 0.875rem;
+    }
+    .custom-select:hover::after {
+      color: var(--text-primary);
+    }
+    .custom-select:focus-within::after {
+      color: var(--accent-primary);
     }
     .search-stats {
       display: flex;
@@ -869,9 +898,11 @@
             <i class="fas fa-folder"></i>
             Package
           </label>
-          <select class="filter-select" id="package-filter">
-            <option value="">All Packages</option>
-          </select>
+          <div class="custom-select">
+            <select class="filter-select" id="package-filter">
+              <option value="">All Packages</option>
+            </select>
+          </div>
         </div>
         
         <div class="filter-group">
@@ -879,9 +910,11 @@
             <i class="fas fa-cube"></i>
             Class
           </label>
-          <select class="filter-select" id="class-filter">
-            <option value="">All Classes</option>
-          </select>
+          <div class="custom-select">
+            <select class="filter-select" id="class-filter">
+              <option value="">All Classes</option>
+            </select>
+          </div>
         </div>
       </div>
       <div class="search-stats">
