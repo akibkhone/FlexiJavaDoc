@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oracle SCM & WMS REST API Catalog</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Light theme */
+            --bg-primary: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 25%, #bae6fd 50%, #7dd3fc 75%, #38bdf8 100%);
+            --bg-secondary: rgba(255, 255, 255, 0.35);
+            --bg-tertiary: rgba(255, 255, 255, 0.25);
+            --bg-glass: rgba(255, 255, 255, 0.30);
+            --bg-glass-hover: rgba(255, 255, 255, 0.45);
+            --bg-overlay: rgba(255, 255, 255, 0.15);
+            --bg-blur: rgba(255, 255, 255, 0.20);
+            
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-tertiary: #64748b;
+            --text-accent: #0ea5e9;
+            --text-on-glass: #1e293b;
+            
+            --border-primary: rgba(148, 163, 184, 0.25);
+            --border-secondary: rgba(148, 163, 184, 0.15);
+            --border-focus: rgba(14, 165, 233, 0.5);
+            --border-hover: rgba(148, 163, 184, 0.35);
+            
+            --accent-primary: #0ea5e9;
+            --accent-secondary: #0284c7;
+            --accent-success: #10b981;
+            --accent-warning: #f59e0b;
+            --accent-error: #ef4444;
+            --accent-oracle: #ff0000;
+            
+            --shadow-glass: 0 8px 32px 0 rgba(14, 165, 233, 0.15);
+            --shadow-glass-lg: 0 25px 50px -12px rgba(14, 165, 233, 0.25);
+            --shadow-glass-xl: 0 35px 60px -12px rgba(14, 165, 233, 0.35);
+            --shadow-inner: inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+            
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --radius-2xl: 32px;
+            
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .dark {
+            --bg-primary: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            --bg-secondary: rgba(30, 41, 59, 0.40);
+            --bg-tertiary: rgba(51, 65, 85, 0.30);
+            --bg-glass: rgba(30, 41, 59, 0.35);
+            --bg-glass-hover: rgba(30, 41, 59, 0.50);
+            --bg-overlay: rgba(15, 23, 42, 0.20);
+            --bg-blur: rgba(30, 41, 59, 0.15);
+            
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --text-accent: #38bdf8;
+            --text-on-glass: #e2e8f0;
+            
+            --border-primary: rgba(148, 163, 184, 0.15);
+            --border-secondary: rgba(148, 163, 184, 0.10);
+            --border-focus: rgba(56, 189, 248, 0.4);
+            --border-hover: rgba(148, 163, 184, 0.20);
+            
+            --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            --shadow-glass-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+            --shadow-glass-xl: 0 35px 60px -12px rgba(0, 0, 0, 0.7);
+            --shadow-inner: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: var(--transition);
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(14, 165, 233, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(125, 211, 252, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Header */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid var(--border-primary);
+            padding: 1.5rem 0;
+            box-shadow: var(--shadow-inner);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, var(--accent-oracle), #cc0000);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 1.5rem;
+            box-shadow: var(--shadow-glass);
+            position: relative;
+            overflow: hidden;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .logo-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 50%);
+            border-radius: inherit;
+        }
+
+        .logo-text {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text-on-glass);
+            letter-spacing: -0.025em;
+            text-shadow: 0 2px 4px rgba(14, 165, 233, 0.1);
+        }
+
+        .logo-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-tertiary);
+            font-weight: 500;
+            margin-left: 0.5rem;
+            opacity: 0.8;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .theme-toggle, .help-btn {
+            width: 3rem;
+            height: 3rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-primary);
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-bounce);
+            box-shadow: var(--shadow-inner);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-toggle:hover, .help-btn:hover {
+            background: var(--bg-glass-hover);
+            color: var(--text-primary);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: var(--shadow-glass);
+            border-color: var(--border-hover);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2.5rem;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: sticky;
+            top: 120px;
+            height: fit-content;
+        }
+
+        .search-section {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: var(--radius-2xl);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-glass-lg);
+            border: 1px solid var(--border-primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .search-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            font-size: 1rem;
+            border: 2px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            background: var(--bg-blur);
+            backdrop-filter: blur(10px);
+            color: var(--text-on-glass);
+            transition: var(--transition);
+            font-family: inherit;
+            font-weight: 500;
+            box-shadow: var(--shadow-inner);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-tertiary);
+            opacity: 0.7;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            background: var(--bg-glass-hover);
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1), var(--shadow-glass);
+            transform: translateY(-1px);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-tertiary);
+            opacity: 0.8;
+        }
+
+        .categories {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: var(--radius-2xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-glass-lg);
+            border: 1px solid var(--border-primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .categories::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        }
+
+        .categories h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-on-glass);
+            margin-bottom: 1.5rem;
+            text-shadow: 0 1px 2px rgba(14, 165, 233, 0.1);
+        }
+
+        .category-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 0.5rem;
+            background: var(--bg-blur);
+            border: 1px solid var(--border-secondary);
+        }
+
+        .category-item:hover, .category-item.active {
+            background: var(--bg-glass-hover);
+            border-color: var(--border-focus);
+            transform: translateX(4px);
+            box-shadow: var(--shadow-glass);
+        }
+
+        .category-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            color: var(--accent-primary);
+        }
+
+        .category-name {
+            font-weight: 600;
+            color: var(--text-on-glass);
+        }
+
+        .category-count {
+            margin-left: auto;
+            background: var(--accent-primary);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .main-content {
+            min-height: 100vh;
+        }
+
+        .content-header {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: var(--radius-2xl);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-glass-lg);
+            border: 1px solid var(--border-primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .content-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        }
+
+        .content-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-on-glass);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(14, 165, 233, 0.1);
+        }
+
+        .content-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-blur);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-secondary);
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: var(--accent-primary);
+            font-size: 1.25rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* API Grid */
+        .api-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+
+        .api-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: var(--radius-2xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-glass-lg);
+            border: 1px solid var(--border-primary);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: var(--transition-bounce);
+        }
+
+        .api-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        }
+
+        .api-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: var(--shadow-glass-xl);
+            border-color: var(--border-focus);
+        }
+
+        .api-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .api-method {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-lg);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .api-method.get {
+            background: linear-gradient(135deg, var(--accent-success), #059669);
+            color: white;
+        }
+
+        .api-method.post {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+        }
+
+        .api-method.put, .api-method.patch {
+            background: linear-gradient(135deg, var(--accent-warning), #d97706);
+            color: white;
+        }
+
+        .api-method.delete {
+            background: linear-gradient(135deg, var(--accent-error), #dc2626);
+            color: white;
+        }
+
+        .api-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-on-glass);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 1px 2px rgba(14, 165, 233, 0.1);
+        }
+
+        .api-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .api-endpoint {
+            font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace;
+            font-size: 0.875rem;
+            color: var(--text-tertiary);
+            background: var(--bg-overlay);
+            backdrop-filter: blur(10px);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-lg);
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-secondary);
+            box-shadow: var(--shadow-inner);
+            word-break: break-all;
+        }
+
+        .api-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .api-tag {
+            background: var(--bg-blur);
+            color: var(--text-secondary);
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-lg);
+            font-size: 0.75rem;
+            font-weight: 500;
+            border: 1px solid var(--border-secondary);
+        }
+
+        .api-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-secondary);
+        }
+
+        .api-updated {
+            color: var(--text-tertiary);
+            font-size: 0.75rem;
+        }
+
+        .api-expand {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-lg);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        }
+
+        .api-expand:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4);
+        }
+
+        /* API Details Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: var(--radius-2xl);
+            padding: 2rem;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-glass-xl);
+            border: 1px solid var(--border-primary);
+            position: relative;
+            transform: scale(0.9);
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-secondary);
+        }
+
+        .modal-close {
+            background: var(--bg-blur);
+            border: 1px solid var(--border-primary);
+            color: var(--text-secondary);
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: var(--bg-glass-hover);
+            color: var(--text-primary);
+            transform: scale(1.1);
+        }
+
+        .payload-section {
+            margin-bottom: 2rem;
+        }
+
+        .payload-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-on-glass);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .code-block {
+            background: var(--bg-overlay);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-secondary);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block pre {
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--bg-blur);
+            border: 1px solid var(--border-primary);
+            color: var(--text-secondary);
+            padding: 0.5rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .copy-btn:hover {
+            background: var(--bg-glass-hover);
+            color: var(--text-primary);
+        }
+
+        /* Syntax Highlighting */
+        .json-key { color: #0ea5e9; }
+        .json-string { color: #10b981; }
+        .json-number { color: #f59e0b; }
+        .json-boolean { color: #ef4444; }
+        .json-null { color: #64748b; }
+
+        /* Tour Overlay */
+        .tour-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 200;
+            display: none;
+        }
+
+        .tour-spotlight {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--accent-primary);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.8);
+        }
+
+        .tour-tooltip {
+            position: absolute;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            max-width: 300px;
+            box-shadow: var(--shadow-glass-lg);
+        }
+
+        .tour-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-on-glass);
+            margin-bottom: 0.5rem;
+        }
+
+        .tour-description {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .tour-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tour-progress {
+            color: var(--text-tertiary);
+            font-size: 0.75rem;
+        }
+
+        .tour-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .tour-btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-lg);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid var(--border-primary);
+        }
+
+        .tour-btn.primary {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .tour-btn.secondary {
+            background: var(--bg-blur);
+            color: var(--text-secondary);
+        }
+
+        .tour-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 2rem 1.5rem;
+                gap: 2rem;
+            }
+            
+            .sidebar {
+                position: static;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 2rem;
+            }
+            
+            .api-grid {
+                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem 1rem;
+                gap: 1.5rem;
+            }
+
+            .header-content {
+                padding: 0 1rem;
+            }
+
+            .logo-text {
+                font-size: 1.5rem;
+            }
+
+            .logo-subtitle {
+                display: none;
+            }
+
+            .sidebar {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .search-section,
+            .categories,
+            .content-header,
+            .api-card {
+                padding: 1.5rem;
+            }
+
+            .content-title {
+                font-size: 1.75rem;
+            }
+
+            .api-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                gap: 1rem;
+            }
+
+            .modal {
+                padding: 1.5rem;
+                max-width: 95vw;
+                max-height: 95vh;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem 0.75rem;
+            }
+            
+            .header-content {
+                padding: 0 0.75rem;
+            }
+            
+            .logo {
+                gap: 0.75rem;
+            }
+            
+            .logo-icon {
+                width: 2.5rem;
+                height: 2.5rem;
+                font-size: 1.25rem;
+            }
+            
+            .logo-text {
+                font-size: 1.25rem;
+            }
+            
+            .theme-toggle, .help-btn {
+                width: 2.5rem;
+                height: 2.5rem;
+            }
+            
+            .search-section,
+            .categories,
+            .content-header,
+            .api-card {
+                padding: 1.25rem;
+            }
+            
+            .content-title {
+                font-size: 1.5rem;
+            }
+            
+            .api-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .api-card {
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        /* Focus styles for accessibility */
+        *:focus-visible {
+            outline: 2px solid var(--accent-primary);
+            outline-offset: 2px;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Loading States */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 5rem 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+            grid-column: 1 / -1; /* Span across all columns */
+        }
+
+        .loading-spinner {
+            width: 4rem;
+            height: 4rem;
+            border: 4px solid var(--border-primary);
+            border-top: 4px solid var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-glass);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">O</div>
+                <div>
+                    <div class="logo-text">Oracle API Catalog</div>
+                    <div class="logo-subtitle">SCM & WMS REST APIs</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="help-btn" id="helpBtn" title="Start Tour">
+                    <i class="fas fa-question"></i>
+                </button>
+                <button class="theme-toggle" id="themeToggle" title="Toggle Theme">
+                    <i class="fas fa-sun"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="search-section">
+                <div style="position: relative;">
+                    <i class="fas fa-search search-icon"></i>
+                    <input 
+                        type="text" 
+                        class="search-input" 
+                        id="searchInput"
+                        placeholder="Search APIs, endpoints, or entities..."
+                        autocomplete="off"
+                    >
+                </div>
+            </div>
+
+            <div class="categories" id="categories">
+                <h3>Business Categories</h3>
+                <div class="category-item active" data-category="all">
+                    <i class="fas fa-th-large category-icon"></i>
+                    <span class="category-name">All APIs</span>
+                    <span class="category-count" id="allCount">0</span>
+                </div>
+                <div class="category-item" data-category="inventory">
+                    <i class="fas fa-boxes category-icon"></i>
+                    <span class="category-name">Inventory Management</span>
+                    <span class="category-count" id="inventoryCount">0</span>
+                </div>
+                <div class="category-item" data-category="orders">
+                    <i class="fas fa-shopping-cart category-icon"></i>
+                    <span class="category-name">Order Management</span>
+                    <span class="category-count" id="ordersCount">0</span>
+                </div>
+                <div class="category-item" data-category="procurement">
+                    <i class="fas fa-handshake category-icon"></i>
+                    <span class="category-name">Procurement</span>
+                    <span class="category-count" id="procurementCount">0</span>
+                </div>
+                <div class="category-item" data-category="warehouse">
+                    <i class="fas fa-warehouse category-icon"></i>
+                    <span class="category-name">Warehouse Operations</span>
+                    <span class="category-count" id="warehouseCount">0</span>
+                </div>
+                <div class="category-item" data-category="inbound">
+                    <i class="fas fa-truck-loading category-icon"></i>
+                    <span class="category-name">Inbound Processing</span>
+                    <span class="category-count" id="inboundCount">0</span>
+                </div>
+                <div class="category-item" data-category="outbound">
+                    <i class="fas fa-shipping-fast category-icon"></i>
+                    <span class="category-name">Outbound & Fulfillment</span>
+                    <span class="category-count" id="outboundCount">0</span>
+                </div>
+                <div class="category-item" data-category="putaway">
+                    <i class="fas fa-dolly category-icon"></i>
+                    <span class="category-name">Putaway & Replenishment</span>
+                    <span class="category-count" id="putawayCount">0</span>
+                </div>
+                <div class="category-item" data-category="lpn">
+                    <i class="fas fa-barcode category-icon"></i>
+                    <span class="category-name">LPN Management</span>
+                    <span class="category-count" id="lpnCount">0</span>
+                </div>
+                <div class="category-item" data-category="asn">
+                    <i class="fas fa-clipboard-list category-icon"></i>
+                    <span class="category-name">ASN Processing</span>
+                    <span class="category-count" id="asnCount">0</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title" id="contentTitle">Oracle SCM & WMS REST APIs</h1>
+                <p class="content-subtitle" id="contentSubtitle">Comprehensive catalog of Oracle Cloud Supply Chain Management and Warehouse Management System REST APIs</p>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-value" id="totalApis">0</span>
+                        <span class="stat-label">Total APIs</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="totalCategories">10</span>
+                        <span class="stat-label">Categories</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="lastUpdated">N/A</span>
+                        <span class="stat-label">Last Updated</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="api-grid" id="apiGrid">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Loading Oracle API catalog...</p>
+                    <p style="font-size: 0.875rem; margin-top: 0.5rem; opacity: 0.7;">
+                        If this takes too long, ensure 'api-data.json' exists and is populated.
+                        <br>Refer to the 'scripts/scrape_oracle_docs.py' for instructions on generating this file.
+                    </p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- API Details Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="modal">
+            <div class="modal-header">
+                <div>
+                    <h2 id="modalTitle">API Details</h2>
+                    <p id="modalDescription">API description</p>
+                </div>
+                <button class="modal-close" id="modalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="modalContent">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Tour Overlay -->
+    <div class="tour-overlay" id="tourOverlay">
+        <div class="tour-spotlight" id="tourSpotlight"></div>
+        <div class="tour-tooltip" id="tourTooltip">
+            <h3 class="tour-title" id="tourTitle">Welcome to Oracle API Catalog</h3>
+            <p class="tour-description" id="tourDescription">Let's take a quick tour of the features</p>
+            <div class="tour-actions">
+                <span class="tour-progress" id="tourProgress">1 of 5</span>
+                <div class="tour-buttons">
+                    <button class="tour-btn secondary" id="tourSkip">Skip</button>
+                    <button class="tour-btn primary" id="tourNext">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variable to store API data
+        let oracleApiData = [];
+        let currentCategory = 'all';
+        let filteredApis = [];
+        let isDarkMode = localStorage.getItem('theme') === 'dark';
+
+        // DOM Elements
+        const themeToggle = document.getElementById('themeToggle');
+        const searchInput = document.getElementById('searchInput');
+        const apiGrid = document.getElementById('apiGrid');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modal = document.getElementById('modal');
+        const modalClose = document.getElementById('modalClose');
+        const helpBtn = document.getElementById('helpBtn');
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+            setupEventListeners();
+            loadApiData();
+            
+            // Show tour for first-time users
+            if (!localStorage.getItem('tourCompleted')) {
+                setTimeout(() => startTour(), 1500); // Delay tour slightly to allow data load
+            }
+        });
+
+        // Load API Data from JSON file
+        async function loadApiData() {
+            try {
+                const response = await fetch('api-data.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                oracleApiData = await response.json();
+                filteredApis = [...oracleApiData]; // Initialize filteredApis with all data
+                updateCategoryCounts();
+                renderApis();
+                updateContentHeader();
+                document.getElementById('lastUpdated').textContent = oracleApiData.length > 0 ? new Date().getFullYear() : 'N/A'; // Placeholder for last updated
+            } catch (error) {
+                console.error('Failed to load API data:', error);
+                apiGrid.innerHTML = `
+                    <div class="loading" style="grid-column: 1 / -1;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; color: var(--accent-error);"></i>
+                        <p style="color: var(--accent-error);">Error loading API data.</p>
+                        <p style="font-size: 0.875rem; margin-top: 0.5rem; opacity: 0.7;">
+                            Please ensure 'api-data.json' exists in the same directory as this HTML file and is correctly formatted.
+                            <br>Refer to the 'scripts/scrape_oracle_docs.py' for instructions on generating this file.
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        // Theme Management
+        function initializeTheme() {
+            if (isDarkMode) {
+                document.body.classList.add('dark');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            }
+        }
+
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark');
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+            themeToggle.innerHTML = isDarkMode ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+        }
+
+        // Event Listeners
+        function setupEventListeners() {
+            themeToggle.addEventListener('click', toggleTheme);
+            searchInput.addEventListener('input', handleSearch);
+            modalClose.addEventListener('click', closeModal);
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) closeModal();
+            });
+            helpBtn.addEventListener('click', startTour);
+
+            // Category filters
+            document.querySelectorAll('.category-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const category = item.dataset.category;
+                    setActiveCategory(category);
+                    filterByCategory(category);
+                });
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeModal();
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+            });
+        }
+
+        // Search Functionality
+        function handleSearch(e) {
+            const query = e.target.value.toLowerCase().trim();
+            
+            let baseApis = currentCategory === 'all' 
+                ? oracleApiData 
+                : oracleApiData.filter(api => api.category === currentCategory);
+            
+            if (!query) {
+                filteredApis = [...baseApis];
+            } else {
+                filteredApis = baseApis.filter(api => 
+                    api.name.toLowerCase().includes(query) ||
+                    api.description.toLowerCase().includes(query) ||
+                    api.endpoint.toLowerCase().includes(query) ||
+                    (api.tags && api.tags.some(tag => tag.toLowerCase().includes(query)))
+                );
+            }
+            
+            renderApis();
+            updateContentHeader();
+        }
+
+        // Category Management
+        function setActiveCategory(category) {
+            document.querySelectorAll('.category-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[data-category="${category}"]`).classList.add('active');
+            currentCategory = category;
+        }
+
+        function filterByCategory(category) {
+            if (category === 'all') {
+                filteredApis = [...oracleApiData];
+            } else {
+                filteredApis = oracleApiData.filter(api => api.category === category);
+            }
+            
+            // Apply search filter if active
+            const searchQuery = searchInput.value.toLowerCase().trim();
+            if (searchQuery) {
+                filteredApis = filteredApis.filter(api => 
+                    api.name.toLowerCase().includes(searchQuery) ||
+                    api.description.toLowerCase().includes(searchQuery) ||
+                    api.endpoint.toLowerCase().includes(searchQuery) ||
+                    (api.tags && api.tags.some(tag => tag.toLowerCase().includes(searchQuery)))
+                );
+            }
+            
+            renderApis();
+            updateContentHeader();
+        }
+
+        // Update Category Counts
+        function updateCategoryCounts() {
+            const categories = [
+                'all', 'inventory', 'orders', 'procurement', 'warehouse', 
+                'inbound', 'outbound', 'putaway', 'lpn', 'asn'
+            ];
+            const counts = {};
+
+            categories.forEach(cat => {
+                if (cat === 'all') {
+                    counts[cat] = oracleApiData.length;
+                } else {
+                    counts[cat] = oracleApiData.filter(api => api.category === cat).length;
+                }
+            });
+
+            Object.keys(counts).forEach(category => {
+                const element = document.getElementById(`${category}Count`);
+                if (element) element.textContent = counts[category];
+            });
+
+            document.getElementById('totalApis').textContent = oracleApiData.length;
+        }
+
+        // Update Content Header
+        function updateContentHeader() {
+            const title = document.getElementById('contentTitle');
+            const subtitle = document.getElementById('contentSubtitle');
+            
+            if (currentCategory === 'all') {
+                title.textContent = 'Oracle SCM & WMS REST APIs';
+                subtitle.textContent = 'Comprehensive catalog of Oracle Cloud Supply Chain Management and Warehouse Management System REST APIs';
+            } else {
+                const categoryNames = {
+                    inventory: 'Inventory Management APIs',
+                    orders: 'Order Management APIs',
+                    procurement: 'Procurement APIs',
+                    warehouse: 'Warehouse Operations APIs',
+                    inbound: 'Inbound Processing APIs',
+                    outbound: 'Outbound & Fulfillment APIs',
+                    putaway: 'Putaway & Replenishment APIs',
+                    lpn: 'LPN Management APIs',
+                    asn: 'ASN Processing APIs'
+                };
+                
+                title.textContent = categoryNames[currentCategory] || 'APIs';
+                subtitle.textContent = `${filteredApis.length} APIs in this category`;
+            }
+        }
+
+        // Render API Cards
+        function renderApis() {
+            if (filteredApis.length === 0 && oracleApiData.length > 0) { // Data loaded but no matches
+                apiGrid.innerHTML = `
+                    <div class="loading" style="grid-column: 1 / -1;">
+                        <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p>No APIs found matching your criteria</p>
+                        <p style="font-size: 0.875rem; margin-top: 0.5rem; opacity: 0.7;">Try adjusting your search terms or category filter</p>
+                    </div>
+                `;
+                return;
+            } else if (oracleApiData.length === 0) { // No data loaded yet or empty JSON
+                // Keep loading spinner or error message from loadApiData
+                return;
+            }
+
+            apiGrid.innerHTML = filteredApis.map(api => `
+                <div class="api-card" onclick="openApiDetails('${api.id}')">
+                    <div class="api-header">
+                        <div>
+                            <span class="api-method ${api.method.toLowerCase()}">${api.method}</span>
+                        </div>
+                    </div>
+                    <h3 class="api-title">${api.name}</h3>
+                    <p class="api-description">${api.description}</p>
+                    <div class="api-endpoint">${api.endpoint}</div>
+                    <div class="api-tags">
+                        ${api.tags ? api.tags.map(tag => `<span class="api-tag">${tag}</span>`).join('') : ''}
+                    </div>
+                    <div class="api-footer">
+                        <span class="api-updated">Updated: ${api.lastUpdated ? formatDate(api.lastUpdated) : 'N/A'}</span>
+                        <button class="api-expand" onclick="event.stopPropagation(); openApiDetails('${api.id}')">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Format Date
+        function formatDate(dateString) {
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) {
+                    return dateString; // Return original if invalid date
+                }
+                return date.toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+            } catch (e) {
+                return dateString; // Fallback
+            }
+        }
+
+        // Open API Details Modal
+        function openApiDetails(apiId) {
+            const api = oracleApiData.find(a => a.id === apiId);
+            if (!api) return;
+
+            document.getElementById('modalTitle').textContent = api.name;
+            document.getElementById('modalDescription').textContent = api.description;
+
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
+                <div class="payload-section">
+                    <div class="payload-title">
+                        <i class="fas fa-info-circle"></i>
+                        Business Context
+                    </div>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6;">
+                        ${api.businessExplanation || 'No specific business explanation provided in the data.'}
+                    </p>
+                </div>
+
+                <div class="payload-section">
+                    <div class="payload-title">
+                        <i class="fas fa-link"></i>
+                        Endpoint Details
+                    </div>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyToClipboard('${api.method} ${api.endpoint}')">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <pre><span class="api-method ${api.method.toLowerCase()}">${api.method}</span> ${api.endpoint}</pre>
+                    </div>
+                </div>
+
+                ${api.requestPayload ? `
+                <div class="payload-section">
+                    <div class="payload-title">
+                        <i class="fas fa-upload"></i>
+                        Request Payload
+                    </div>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyToClipboard('${JSON.stringify(api.requestPayload, null, 2).replace(/'/g, "\\'")}')">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <pre>${syntaxHighlight(JSON.stringify(api.requestPayload, null, 2))}</pre>
+                    </div>
+                </div>
+                ` : ''}
+
+                ${api.responsePayload ? `
+                <div class="payload-section">
+                    <div class="payload-title">
+                        <i class="fas fa-download"></i>
+                        Response Payload
+                    </div>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyToClipboard('${JSON.stringify(api.responsePayload, null, 2).replace(/'/g, "\\'")}')">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <pre>${syntaxHighlight(JSON.stringify(api.responsePayload, null, 2))}</pre>
+                    </div>
+                </div>
+                ` : ''}
+
+                <div class="payload-section">
+                    <div class="payload-title">
+                        <i class="fas fa-external-link-alt"></i>
+                        Official Documentation
+                    </div>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                        For complete API documentation, parameters, and additional examples:
+                    </p>
+                    <a href="${api.docUrl || '#'}" target="_blank" style="
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        background: var(--accent-primary);
+                        color: white;
+                        padding: 0.75rem 1.5rem;
+                        border-radius: var(--radius-lg);
+                        text-decoration: none;
+                        font-weight: 600;
+                        transition: var(--transition);
+                    " onmouseover="this.style.background='var(--accent-secondary)'" onmouseout="this.style.background='var(--accent-primary)'">
+                        <i class="fas fa-book"></i>
+                        View Oracle Documentation
+                    </a>
+                    ${!api.docUrl ? '<p style="color: var(--text-tertiary); font-size: 0.8rem; margin-top: 0.5rem;">(No specific documentation URL provided for this API in the data.)</p>' : ''}
+                </div>
+            `;
+
+            modalOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close Modal
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Syntax Highlighting
+        function syntaxHighlight(json) {
+            if (typeof json !== 'string') {
+                json = JSON.stringify(json, undefined, 2);
+            }
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                let cls = 'json-number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                    } else {
+                        cls = 'json-string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'json-boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'json-null';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+
+        // Copy to Clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Show temporary success message
+                const btn = event.target.closest('.copy-btn');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                btn.style.color = 'var(--accent-success)';
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.style.color = '';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+
+        // Tour Functionality
+        const tourSteps = [
+            {
+                target: '.search-section',
+                title: 'Search APIs',
+                description: 'Search through Oracle APIs by name, description, endpoint, or tags. Use Ctrl+K for quick access.',
+                position: 'right'
+            },
+            {
+                target: '.categories',
+                title: 'Business Categories',
+                description: 'Browse APIs by business function. Categories are organized by consultant-friendly terms.',
+                position: 'right'
+            },
+            {
+                target: '.api-grid',
+                title: 'API Catalog',
+                description: 'Each card shows API details including method, endpoint, and description. Click for full details.',
+                position: 'top'
+            },
+            {
+                target: '.theme-toggle',
+                title: 'Theme Toggle',
+                description: 'Switch between light and dark modes for comfortable viewing.',
+                position: 'left'
+            },
+            {
+                target: '.help-btn',
+                title: 'Help & Tour',
+                description: 'Click here anytime to restart this tour or get help.',
+                position: 'left'
+            }
+        ];
+
+        let currentTourStep = 0;
+
+        function startTour() {
+            document.getElementById('tourOverlay').style.display = 'block';
+            currentTourStep = 0;
+            showTourStep();
+        }
+
+        function showTourStep() {
+            const step = tourSteps[currentTourStep];
+            const target = document.querySelector(step.target);
+            const spotlight = document.getElementById('tourSpotlight');
+            const tooltip = document.getElementById('tourTooltip');
+
+            if (!target) {
+                // If target not found, skip this step or end tour
+                console.warn(`Tour target not found: ${step.target}. Skipping step.`);
+                nextTourStep();
+                return;
+            }
+
+            const rect = target.getBoundingClientRect();
+            
+            // Position spotlight
+            spotlight.style.left = (rect.left - 10) + 'px';
+            spotlight.style.top = (rect.top - 10) + 'px';
+            spotlight.style.width = (rect.width + 20) + 'px';
+            spotlight.style.height = (rect.height + 20) + 'px';
+
+            // Position tooltip
+            let tooltipLeft = rect.left;
+            let tooltipTop = rect.bottom + 20;
+
+            if (step.position === 'right') {
+                tooltipLeft = rect.right + 20;
+                tooltipTop = rect.top;
+            } else if (step.position === 'left') {
+                tooltipLeft = rect.left - 320;
+                tooltipTop = rect.top;
+            } else if (step.position === 'top') {
+                tooltipTop = rect.top - tooltip.offsetHeight - 20; // Adjust for tooltip height
+            }
+
+            // Ensure tooltip stays within viewport
+            tooltip.style.left = Math.max(20, Math.min(tooltipLeft, window.innerWidth - tooltip.offsetWidth - 20)) + 'px';
+            tooltip.style.top = Math.max(20, tooltipTop) + 'px';
+
+            // Update content
+            document.getElementById('tourTitle').textContent = step.title;
+            document.getElementById('tourDescription').textContent = step.description;
+            document.getElementById('tourProgress').textContent = `${currentTourStep + 1} of ${tourSteps.length}`;
+
+            // Update buttons
+            const nextBtn = document.getElementById('tourNext');
+            nextBtn.textContent = currentTourStep === tourSteps.length - 1 ? 'Finish' : 'Next';
+        }
+
+        function nextTourStep() {
+            if (currentTourStep < tourSteps.length - 1) {
+                currentTourStep++;
+                showTourStep();
+            } else {
+                endTour();
+            }
+        }
+
+        function skipTour() {
+            endTour();
+        }
+
+        function endTour() {
+            document.getElementById('tourOverlay').style.display = 'none';
+            localStorage.setItem('tourCompleted', 'true');
+        }
+
+        // Tour event listeners
+        document.getElementById('tourNext').addEventListener('click', nextTourStep);
+        document.getElementById('tourSkip').addEventListener('click', skipTour);
+
+        // Recalculate tour position on resize
+        window.addEventListener('resize', () => {
+            if (document.getElementById('tourOverlay').style.display === 'block') {
+                showTourStep();
+            }
+        });
+    </script>
+</body>
+</html>

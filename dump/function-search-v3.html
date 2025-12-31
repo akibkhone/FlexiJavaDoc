@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>JavaDoc Explorer • Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      /* Base Variables - Light */
+      --color-bg: #f8fafc;
+      --color-surface: #ffffff;
+      --color-surface-hover: #f1f5f9;
+      --color-border: #e2e8f0;
+      --color-text-main: #0f172a;
+      --color-text-muted: #64748b;
+      --color-primary: #3b82f6;
+      --color-primary-glow: rgba(59, 130, 246, 0.15);
+      --color-accent: #8b5cf6;
+      --color-success: #10b981;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.025);
+      --font-sans: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --header-height: 70px;
+    }
+
+    .dark {
+      --color-bg: #0b1120;
+      --color-surface: #1e293b;
+      --color-surface-hover: #334155;
+      --color-border: #334155;
+      --color-text-main: #f1f5f9;
+      --color-text-muted: #94a3b8;
+      --color-primary: #60a5fa;
+      --color-primary-glow: rgba(96, 165, 250, 0.15);
+      --color-accent: #a78bfa;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.3);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      background-color: var(--color-bg);
+      color: var(--color-text-main);
+      transition: background-color 0.3s ease, color 0.3s ease;
+      overflow-y: scroll; /* Always show scrollbar to prevent layout shift */
+    }
+
+    /* Ambient Background */
+    .ambient-bg {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      z-index: -1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.4;
+      animation: float 20s infinite ease-in-out;
+    }
+    
+    .blob-1 {
+      top: -10%; right: -5%; width: 50vw; height: 50vw;
+      background: radial-gradient(circle, var(--color-primary) 0%, transparent 70%);
+      opacity: 0.1;
+    }
+    
+    .blob-2 {
+      bottom: -10%; left: -5%; width: 40vw; height: 40vw;
+      background: radial-gradient(circle, var(--color-accent) 0%, transparent 70%);
+      opacity: 0.08;
+      animation-delay: -10s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(-20px, 20px); }
+    }
+
+    /* Layout */
+    .app-wrapper {
+      max-width: 1000px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .app-header {
+      position: sticky;
+      top: 0;
+      height: var(--header-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid transparent;
+      z-index: 50;
+      transition: all 0.3s;
+    }
+    
+    .dark .app-header { background: rgba(15, 23, 42, 0.8); }
+    
+    .app-header.scrolled {
+      border-color: var(--color-border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--color-text-main);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+    
+    .brand-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+      color: white;
+      border-radius: 8px;
+      display: grid; place-items: center;
+      font-family: var(--font-mono);
+    }
+
+    /* Controls */
+    .header-controls {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .icon-btn {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text-muted);
+      cursor: pointer;
+      display: grid; place-items: center;
+      transition: all 0.2s;
+    }
+    
+    .icon-btn:hover {
+      background: var(--color-surface-hover);
+      color: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    /* Search Area */
+    .search-area {
+      position: relative;
+      z-index: 40;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      box-shadow: var(--shadow-lg), 0 0 0 1px var(--color-border);
+      border-radius: var(--radius-xl);
+      background: var(--color-surface);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .search-input-wrapper:focus-within {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg), 0 0 0 2px var(--color-primary);
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 1.25rem 3.5rem;
+      font-size: 1.1rem;
+      border: none;
+      background: transparent;
+      color: var(--color-text-main);
+      font-family: var(--font-sans);
+      outline: none;
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 1.25rem; top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-text-muted);
+      pointer-events: none;
+    }
+    
+    .search-kbd {
+      position: absolute;
+      right: 1.25rem; top: 50%;
+      transform: translateY(-50%);
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      border: 1px solid var(--color-border);
+      background: var(--color-bg);
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      font-weight: 600;
+      pointer-events: none;
+    }
+
+    /* Filters */
+    .filters-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .select-group {
+      position: relative;
+    }
+    
+    .custom-select {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.5rem;
+      appearance: none;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      color: var(--color-text-main);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .custom-select:hover { border-color: var(--color-text-muted); }
+    .custom-select:focus { outline: none; border-color: var(--color-primary); }
+    
+    .select-icon {
+      position: absolute;
+      left: 1rem; top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    /* Stats Dashboard */
+    .stats-dashboard {
+      display: flex;
+      gap: 2rem;
+      padding: 1rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 1rem;
+      overflow-x: auto;
+    }
+    
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      min-width: 100px;
+    }
+    
+    .stat-val {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-text-main);
+      font-feature-settings: "tnum";
+    }
+    
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Results List */
+    .results-area {
+      min-height: 400px;
+    }
+    
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+    }
+
+    .results-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .result-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .result-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--color-primary);
+    }
+    
+    .result-card.selected {
+      border-color: var(--color-primary);
+      background: var(--color-surface-hover);
+      box-shadow: 0 0 0 2px var(--color-primary-glow);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.5rem;
+    }
+    
+    .method-name {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: var(--color-primary);
+      font-size: 1rem;
+    }
+    
+    .class-badge {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      background: var(--color-bg);
+      border-radius: 6px;
+      color: var(--color-text-muted);
+      border: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .code-preview {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      background: var(--color-bg);
+      padding: 0.75rem;
+      border-radius: var(--radius-md);
+      overflow-x: auto;
+      margin: 0.75rem 0;
+      white-space: pre-wrap;
+      border: 1px solid transparent;
+    }
+    
+    .result-card:hover .code-preview {
+      border-color: var(--color-border);
+      background: var(--color-surface);
+    }
+
+    .method-desc {
+      font-size: 0.9rem;
+      color: var(--color-text-main);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    
+    .result-card:hover .card-actions, .result-card:focus-within .card-actions {
+      opacity: 1;
+    }
+    
+    .action-btn {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.75rem;
+      border-radius: 6px;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    
+    .action-btn:hover {
+      background: var(--color-primary);
+      color: white;
+      border-color: var(--color-primary);
+    }
+
+    /* Highlight */
+    .hl {
+      background: rgba(250, 204, 21, 0.2);
+      color: #ca8a04;
+      border-radius: 2px;
+      padding: 0 2px;
+    }
+    .dark .hl { color: #facc15; }
+
+    /* Loading & Empty States */
+    .state-msg {
+      text-align: center;
+      padding: 4rem 1rem;
+      color: var(--color-text-muted);
+    }
+    
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--color-border);
+      border-top-color: var(--color-primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      z-index: 100;
+      pointer-events: none;
+    }
+    
+    .toast {
+      background: var(--color-text-main);
+      color: var(--color-bg);
+      padding: 0.75rem 1.5rem;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .toast.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Scroll Top */
+    .scroll-top {
+      position: fixed;
+      bottom: 2rem; right: 2rem;
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      color: white;
+      border: none;
+      box-shadow: var(--shadow-lg);
+      cursor: pointer;
+      display: grid; place-items: center;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: all 0.3s;
+      z-index: 45;
+    }
+    
+    .scroll-top.visible { opacity: 1; transform: scale(1); }
+    .scroll-top:hover { transform: scale(1.1) translateY(-4px); }
+
+    /* Skeleton Loading */
+    .skeleton {
+      background: linear-gradient(90deg, var(--color-surface) 25%, var(--color-surface-hover) 50%, var(--color-surface) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 4px;
+    }
+    
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    /* Mobile */
+    @media (max-width: 640px) {
+      .app-header { padding: 0 1rem; }
+      .search-kbd { display: none; }
+      .filters-bar { grid-template-columns: 1fr; }
+      .stats-dashboard { display: none; } /* Hide stats on very small screens to save space */
+    }
+  </style>
+</head>
+<body>
+  <!-- Ambient Background -->
+  <div class="ambient-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+  </div>
+
+  <div class="app-wrapper">
+    <header class="app-header" id="header">
+      <a href="#" class="brand">
+        <div class="brand-icon">J</div>
+        <span>JavaDoc Explorer</span>
+      </a>
+      
+      <div class="header-controls">
+        <button class="icon-btn" id="theme-btn" aria-label="Toggle Theme">
+          <i class="fas fa-moon"></i>
+        </button>
+        <button class="icon-btn" id="github-btn" aria-label="GitHub" onclick="window.open('https://github.com', '_blank')">
+          <i class="fab fa-github"></i>
+        </button>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- Search -->
+      <div class="search-area">
+        <div class="search-input-wrapper">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" class="search-input" id="search-input" placeholder="Search methods, classes, or packages..." autocomplete="off" spellcheck="false">
+          <div class="search-kbd">⌘K</div>
+        </div>
+      </div>
+
+      <!-- Filters & Stats -->
+      <div class="controls-area">
+        <div class="stats-dashboard" id="stats-panel" style="display:none">
+          <div class="stat-item">
+            <span class="stat-val" id="count-methods">0</span>
+            <span class="stat-label">Methods</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-val" id="count-classes">0</span>
+            <span class="stat-label">Classes</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-val" id="count-packages">0</span>
+            <span class="stat-label">Packages</span>
+          </div>
+        </div>
+
+        <div class="filters-bar">
+          <div class="select-group">
+            <i class="fas fa-folder select-icon"></i>
+            <select id="filter-package" class="custom-select">
+              <option value="">All Packages</option>
+            </select>
+          </div>
+          <div class="select-group">
+            <i class="fas fa-cube select-icon"></i>
+            <select id="filter-class" class="custom-select">
+              <option value="">All Classes</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="results-area">
+        <div class="results-header">
+          <span id="results-count">Initializing...</span>
+          <button id="clear-btn" style="background:none; border:none; color:var(--color-primary); cursor:pointer; font-size:inherit; display:none;">Clear Filters</button>
+        </div>
+        
+        <div id="results-list" class="results-list">
+          <!-- Populated by JS -->
+          <div class="state-msg">
+            <div class="spinner"></div>
+            <p>Indexing Documentation...</p>
+          </div>
+        </div>
+        
+        <!-- Infinite Scroll Trigger -->
+        <div id="scroll-trigger" style="height: 20px; margin-top: 20px;"></div>
+      </div>
+    </main>
+  </div>
+
+  <button class="scroll-top" id="scroll-top">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    /**
+     * JavaDoc Explorer - Pro Edition
+     * High performance, virtualized rendering, robust error handling.
+     */
+    class App {
+      constructor() {
+        // State
+        this.data = [];
+        this.filtered = [];
+        this.renderedCount = 0;
+        this.BATCH_SIZE = 20;
+        this.loading = true;
+        this.theme = localStorage.getItem('jd-theme') || 'light';
+
+        // DOM Elements
+        this.el = {
+          input: document.getElementById('search-input'),
+          list: document.getElementById('results-list'),
+          trigger: document.getElementById('scroll-trigger'),
+          pkgFilter: document.getElementById('filter-package'),
+          clsFilter: document.getElementById('filter-class'),
+          count: document.getElementById('results-count'),
+          stats: document.getElementById('stats-panel'),
+          clearBtn: document.getElementById('clear-btn'),
+          header: document.getElementById('header'),
+          scrollTop: document.getElementById('scroll-top')
+        };
+
+        this.init();
+      }
+
+      async init() {
+        this.applyTheme(this.theme);
+        this.setupEvents();
+        await this.loadData();
+        this.setupInfiniteScroll();
+      }
+
+      setupEvents() {
+        // Theme Toggle
+        document.getElementById('theme-btn').addEventListener('click', () => {
+          this.theme = this.theme === 'light' ? 'dark' : 'light';
+          localStorage.setItem('jd-theme', this.theme);
+          this.applyTheme(this.theme);
+        });
+
+        // Search Input (Debounced)
+        this.el.input.addEventListener('input', this.debounce(() => this.filter(), 150));
+        
+        // Filters
+        this.el.pkgFilter.addEventListener('change', () => {
+          this.populateClassFilter();
+          this.filter();
+        });
+        this.el.clsFilter.addEventListener('change', () => this.filter());
+        this.el.clearBtn.addEventListener('click', () => this.resetFilters());
+
+        // Keyboard Shortcuts
+        document.addEventListener('keydown', (e) => {
+          if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+            e.preventDefault();
+            this.el.input.focus();
+          }
+        });
+
+        // Scroll Effects
+        window.addEventListener('scroll', () => {
+          this.el.header.classList.toggle('scrolled', window.scrollY > 10);
+          this.el.scrollTop.classList.toggle('visible', window.scrollY > 300);
+        }, { passive: true });
+
+        this.el.scrollTop.addEventListener('click', () => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
+
+      applyTheme(theme) {
+        if (theme === 'dark') document.body.classList.add('dark');
+        else document.body.classList.remove('dark');
+        document.querySelector('#theme-btn i').className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+      }
+
+      async loadData() {
+        try {
+          const files = this.getFileList();
+          // Simulate loading or fetch actual data
+          // In a real scenario, this would be a Promise.all() fetch
+          // Here we assume getFileList returns the structure we need to fetch
+          
+          let loaded = 0;
+          const total = files.length;
+          
+          // We will fetch in batches to not block the UI thread too much
+          const batchSize = 5;
+          for (let i = 0; i < total; i += batchSize) {
+            const batch = files.slice(i, i + batchSize);
+            const promises = batch.map(f => this.fetchAndParse(f));
+            const results = await Promise.all(promises);
+            results.flat().forEach(item => {
+              if (item) this.data.push(item);
+            });
+            loaded += batch.length;
+            // Update UI occasionally if needed
+          }
+
+          this.data.sort((a, b) => a.name.localeCompare(b.name));
+          this.filtered = [...this.data];
+          
+          this.populatePackageFilter();
+          this.updateStats();
+          this.renderInitial();
+          this.loading = false;
+          this.showToast('Documentation Index Ready', 'success');
+          
+        } catch (err) {
+          console.error(err);
+          this.el.list.innerHTML = `<div class="state-msg" style="color:var(--color-accent)">Error loading documentation. <br> ${err.message}</div>`;
+        }
+      }
+
+      async fetchAndParse(file) {
+        try {
+          const res = await fetch(file.path);
+          if (!res.ok) return [];
+          const text = await res.text();
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(text, 'text/html');
+          return this.extractMethods(doc, file);
+        } catch {
+          return [];
+        }
+      }
+
+      extractMethods(doc, file) {
+        const methods = [];
+        const rows = doc.querySelectorAll('.methodSummary tr, .memberSummary tr, table[class*="Summary"] tr');
+        
+        rows.forEach(row => {
+          const link = row.querySelector('a[href*="#"]'); // Find link to method
+          if (!link) return;
+          
+          const name = link.textContent.trim();
+          // Filter out garbage
+          if (!name || ['modifier', 'description', 'method', 'type'].some(k => name.toLowerCase().includes(k))) return;
+
+          const typeCol = row.querySelector('.colFirst') || row.querySelector('td:first-child');
+          const type = typeCol ? typeCol.textContent.replace(/static|final|abstract/g, '').trim() : 'void';
+          
+          const descCol = row.querySelector('.colLast') || row.querySelector('td:last-child');
+          const desc = descCol ? descCol.textContent.replace(/\n/g, ' ').trim() : '';
+
+          const signature = row.querySelector('code') ? row.querySelector('code').textContent : `${type} ${name}()`;
+
+          methods.push({
+            name,
+            type,
+            signature,
+            description: desc,
+            className: file.className,
+            package: file.package,
+            url: file.path + (link.getAttribute('href').includes('#') ? link.getAttribute('href') : '#' + name),
+            searchStr: `${name} ${file.className} ${file.package} ${desc}`.toLowerCase()
+          });
+        });
+        return methods;
+      }
+
+      getFileList() {
+        // Hardcoded mapping from previous context
+        const mapping = {
+          'com/intellinum/mia/app/action': ['Action', 'ActionType', 'ClientAction', 'DumpSql'],
+          'com/intellinum/mia/app/device': ['DeviceInfo', 'DeviceType'],
+          'com/intellinum/mia/app/event': ['ApplicationEventListener', 'ButtonEventListener', 'CheckBoxEventListener', 'ComboEventListener', 'ComponentEventListener', 'ContainerEventListener', 'Event', 'EventListener', 'ListItemEventListener', 'LOVEventListener', 'PageEventListener', 'PreventDefaultException', 'TableSelectionEventListener', 'TextInputEventListener'],
+          'com/intellinum/mia/app': ['FlexiObject'],
+          'com/intellinum/mia/app/logfire/logical': ['LogFireJSONObject'],
+          'com/intellinum/mia/app/logfire/logical/util': ['WMSCloudJSONObject', 'WMSCloudRFInterface'],
+          'com/intellinum/mia/app/pages': ['AboutPage', 'DeviceSelectionPage', 'DynamicApplication', 'DynamicPage', 'FlexiApplication', 'KillSessionPage', 'LoginPage', 'LOVPage', 'MenuPage', 'OrganizationValidationApplication', 'OrganizationValidationPage', 'PersonalizationAdminApplication', 'PersonalizationAdminPage', 'ResponsibilityPage'],
+          'com/intellinum/mia/app/pages/lov': ['LOVDatabase', 'LOVDataSource', 'LOVOracleWebService', 'LOVWebServiceNew'],
+          'com/intellinum/mia/app/runtime': ['QueryManager', 'Session'],
+          'com/intellinum/mia/app/ui': ['Application', 'AttachmentField', 'Block', 'Button', 'Chart', 'CheckBoxField', 'Combo', 'ComboItem', 'Component', 'Container', 'Div', 'Divider', 'Field', 'Fieldset', 'FlexiObjectFactory', 'FlexiUIObject', 'GPSField', 'Grid', 'Image', 'InputField', 'KPI', 'Label', 'List', 'ListBox', 'ListItem', 'LOVField', 'MenuItem', 'Page', 'RadioButtonField', 'RadioButtonGroup', 'SideMenu', 'SQLTableDataSource', 'Table', 'TableColumn', 'TableDataSource', 'TableRow', 'TextArea', 'TextInputField'],
+          'com/intellinum/mia/app/ui/logical': ['FlexiAsyncTask', 'FlexiLogicalObject', 'FlexiWebService', 'VoiceMacro'],
+          'com/intellinum/mia/app/util': ['FlexiAPI', 'FlexiCredential', 'FlexiSoundMessageMap', 'FlexiUtil', 'JavaInterpreter', 'JavaMail', 'JavaScriptInterpreter', 'LicenseValidator', 'Md5Encryption', 'PlSqlIntepreter', 'PlSqlParam', 'ProfileLevel', 'SftpFileTransfer', 'SftpFileTransfer2', 'TableResult', 'TokenGenerator', 'WebServiceUtil', 'WebSoap'],
+          'com/intellinum/mia/app/util/converter': ['Converter', 'JSONConverter', 'JSONConverter2', 'PathRelationship', 'XMLConverter'],
+          'com/intellinum/mia/app/util/license': ['AesEncryptor', 'LicenseValidator', 'RegisteredUserLicenseManager'],
+          'com/intellinum/mia/app/util/log': ['DebugLog', 'Log'],
+          'com/intellinum/mia/app/util/patch': ['DatabasePatch'],
+          'com/intellinum/mia/app/util/scan': ['BarcodeComponent', 'BarcodeManager', 'BarcodeType'],
+          'com/intellinum/mia/app/util/statistic': ['BenchmarkData', 'MemoryUsage', 'Statistic'],
+          'com/intellinum/mia/app/util/tools': ['LogAnalysis', 'LogFirePatternConsolidator'],
+          'com/intellinum/mia/app/util/tools/files': ['FlexiZip', 'PDFCreator'],
+          'com/intellinum/mia/app/util/translation': ['GlobalTranslation', 'PageTranslation', 'TranslationManager'],
+          'com/intellinum/mia/app/util/webservice': ['RestWebService', 'SoapWebService', 'WebService'],
+          'com/intellinum/mia/app/util/worker': ['FlexiBackgroundWorkerThread', 'FlexiTask', 'TaskState']
+        };
+
+        const files = [];
+        for (const [pkg, classes] of Object.entries(mapping)) {
+          classes.forEach(c => files.push({
+            path: `${pkg}/${c}.html`,
+            package: pkg.replace(/\//g, '.'),
+            className: c
+          }));
+        }
+        return files;
+      }
+
+      filter() {
+        const term = this.el.input.value.toLowerCase();
+        const pkg = this.el.pkgFilter.value;
+        const cls = this.el.clsFilter.value;
+
+        this.filtered = this.data.filter(item => {
+          if (pkg && item.package !== pkg) return false;
+          if (cls && item.className !== cls) return false;
+          if (term && !item.searchStr.includes(term)) return false;
+          return true;
+        });
+
+        this.renderInitial();
+        this.updateStatsUI();
+        
+        this.el.clearBtn.style.display = (term || pkg || cls) ? 'block' : 'none';
+      }
+
+      renderInitial() {
+        this.renderedCount = 0;
+        this.el.list.innerHTML = '';
+        this.renderBatch();
+      }
+
+      renderBatch() {
+        const batch = this.filtered.slice(this.renderedCount, this.renderedCount + this.BATCH_SIZE);
+        if (batch.length === 0) {
+          if (this.renderedCount === 0) {
+            this.el.list.innerHTML = `<div class="state-msg">No results found.</div>`;
+          }
+          return;
+        }
+
+        const fragment = document.createDocumentFragment();
+        const term = this.el.input.value.trim();
+
+        batch.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'result-card';
+          card.innerHTML = `
+            <div class="card-top">
+              <div class="method-name">${this.highlight(item.name, term)}</div>
+              <div class="class-badge">
+                <i class="fas fa-cube" style="font-size:0.7em"></i> ${item.className}
+              </div>
+            </div>
+            <div class="code-preview">${this.highlight(item.signature, term)}</div>
+            <div class="method-desc">${this.highlight(item.description, term)}</div>
+            <div class="card-actions">
+              <button class="action-btn" onclick="event.stopPropagation(); app.copyText('${item.signature.replace(/'/g, "\\'")}')">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+              <button class="action-btn" style="color:var(--color-primary); border-color:var(--color-primary-glow)" onclick="window.open('${item.url}', '_blank')">
+                <i class="fas fa-external-link-alt"></i> Open
+              </button>
+            </div>
+          `;
+          
+          card.addEventListener('click', () => window.open(item.url, '_blank'));
+          fragment.appendChild(card);
+        });
+
+        this.el.list.appendChild(fragment);
+        this.renderedCount += batch.length;
+        this.updateStatsUI();
+      }
+
+      setupInfiniteScroll() {
+        const observer = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting && this.renderedCount < this.filtered.length) {
+            this.renderBatch();
+          }
+        }, { rootMargin: '100px' });
+        
+        observer.observe(this.el.trigger);
+      }
+
+      highlight(text, term) {
+        if (!term) return text;
+        try {
+          const re = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+          return text.replace(re, '<span class="hl">$1</span>');
+        } catch { return text; }
+      }
+
+      populatePackageFilter() {
+        const pkgs = [...new Set(this.data.map(i => i.package))].sort();
+        this.el.pkgFilter.innerHTML = '<option value="">All Packages</option>' + 
+          pkgs.map(p => `<option value="${p}">${p}</option>`).join('');
+        this.populateClassFilter();
+      }
+
+      populateClassFilter() {
+        const selectedPkg = this.el.pkgFilter.value;
+        const classes = [...new Set(this.data
+          .filter(i => !selectedPkg || i.package === selectedPkg)
+          .map(i => i.className))].sort();
+          
+        this.el.clsFilter.innerHTML = '<option value="">All Classes</option>' + 
+          classes.map(c => `<option value="${c}">${c}</option>`).join('');
+      }
+
+      updateStats() {
+        document.getElementById('count-methods').textContent = this.data.length.toLocaleString();
+        document.getElementById('count-classes').textContent = new Set(this.data.map(i => i.className)).size;
+        document.getElementById('count-packages').textContent = new Set(this.data.map(i => i.package)).size;
+        this.el.stats.style.display = 'flex';
+      }
+
+      updateStatsUI() {
+        const total = this.data.length;
+        const shown = this.filtered.length;
+        this.el.count.textContent = shown === total ? `${total} Methods` : `${shown} results`;
+      }
+
+      resetFilters() {
+        this.el.input.value = '';
+        this.el.pkgFilter.value = '';
+        this.populateClassFilter();
+        this.filter();
+      }
+
+      debounce(func, wait) {
+        let timeout;
+        return (...args) => {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+      }
+
+      showToast(msg, type='info') {
+        const t = document.createElement('div');
+        t.className = 'toast';
+        t.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i> ${msg}`;
+        document.getElementById('toast-container').appendChild(t);
+        requestAnimationFrame(() => t.classList.add('visible'));
+        setTimeout(() => {
+          t.classList.remove('visible');
+          setTimeout(() => t.remove(), 300);
+        }, 3000);
+      }
+
+      async copyText(text) {
+        try {
+          await navigator.clipboard.writeText(text);
+          this.showToast('Copied to clipboard', 'success');
+        } catch {
+          this.showToast('Failed to copy', 'error');
+        }
+      }
+    }
+
+    // Init
+    let app;
+    window.addEventListener('DOMContentLoaded', () => { app = new App(); });
+  </script>
+</body>
+</html>

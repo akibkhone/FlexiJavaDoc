@@ -1,0 +1,1970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JavaDoc Explorer • Advanced Search</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f1f5f9;
+      --bg-glass: rgba(255, 255, 255, 0.9);
+      --bg-elevated: #ffffff;
+      
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-tertiary: #94a3b8;
+      --text-accent: #2563eb;
+      
+      --border-primary: #e2e8f0;
+      --border-secondary: #cbd5e1;
+      --border-focus: #3b82f6;
+      
+      --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      --accent-primary: #3b82f6;
+      --accent-secondary: #8b5cf6;
+      --accent-success: #10b981;
+      --accent-warning: #f59e0b;
+      --accent-error: #ef4444;
+      
+      --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
+      --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
+      --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.06);
+      --shadow-glow: 0 0 40px rgba(59, 130, 246, 0.15);
+      
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --radius-full: 9999px;
+      
+      --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-base: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .dark {
+      --bg-primary: #0c0f1a;
+      --bg-secondary: #141827;
+      --bg-tertiary: #1e2235;
+      --bg-glass: rgba(20, 24, 39, 0.95);
+      --bg-elevated: #1a1f33;
+      
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-tertiary: #64748b;
+      --text-accent: #60a5fa;
+      
+      --border-primary: #1e293b;
+      --border-secondary: #334155;
+      --border-focus: #60a5fa;
+      
+      --accent-primary: #60a5fa;
+      --accent-secondary: #a78bfa;
+      
+      --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+      --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.6);
+      --shadow-glow: 0 0 60px rgba(96, 165, 250, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      transition: background var(--transition-slow), color var(--transition-slow);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Ambient Background */
+    .ambient-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .ambient-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.4;
+      animation: float 20s ease-in-out infinite;
+    }
+
+    .ambient-orb:nth-child(1) {
+      width: 600px;
+      height: 600px;
+      background: var(--accent-primary);
+      top: -200px;
+      right: -100px;
+      opacity: 0.08;
+    }
+
+    .ambient-orb:nth-child(2) {
+      width: 400px;
+      height: 400px;
+      background: var(--accent-secondary);
+      bottom: -100px;
+      left: -100px;
+      opacity: 0.06;
+      animation-delay: -10s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, -30px) scale(1.05); }
+    }
+
+    /* Header */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid var(--border-primary);
+      transition: all var(--transition-base);
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      text-decoration: none;
+      transition: transform var(--transition-fast);
+    }
+
+    .logo:hover {
+      transform: translateY(-1px);
+    }
+
+    .logo-icon {
+      width: 2.75rem;
+      height: 2.75rem;
+      background: var(--accent-gradient);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 1.25rem;
+      box-shadow: var(--shadow-md), 0 4px 12px rgba(59, 130, 246, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .logo-icon::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, transparent 50%);
+    }
+
+    .logo-text-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.125rem;
+    }
+
+    .logo-text {
+      font-size: 1.375rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .logo-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .icon-btn {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-primary);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition-fast);
+      font-size: 1rem;
+    }
+
+    .icon-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .icon-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Main Container */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Card Base */
+    .card {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-primary);
+      box-shadow: var(--shadow-sm);
+      transition: all var(--transition-base);
+      overflow: hidden;
+    }
+
+    /* Search Section */
+    .search-section {
+      padding: 2rem;
+      position: relative;
+    }
+
+    .search-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--accent-gradient);
+    }
+
+    .search-header {
+      margin-bottom: 1.75rem;
+    }
+
+    .search-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.375rem;
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      letter-spacing: -0.01em;
+    }
+
+    .search-title i {
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .search-description {
+      color: var(--text-tertiary);
+      font-size: 0.875rem;
+    }
+
+    /* Search Input */
+    .search-bar {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 1rem 1rem 1rem 3.25rem;
+      font-size: 1rem;
+      font-weight: 500;
+      border: 2px solid var(--border-primary);
+      border-radius: var(--radius-lg);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      transition: all var(--transition-fast);
+      font-family: inherit;
+    }
+
+    .search-input::placeholder {
+      color: var(--text-tertiary);
+      font-weight: 400;
+    }
+
+    .search-input:hover {
+      border-color: var(--border-secondary);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1), var(--shadow-glow);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1.125rem;
+      color: var(--text-tertiary);
+      font-size: 1rem;
+      transition: color var(--transition-fast);
+      pointer-events: none;
+    }
+
+    .search-input:focus ~ .search-icon {
+      color: var(--accent-primary);
+    }
+
+    .search-kbd {
+      position: absolute;
+      right: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    .kbd {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-primary);
+      border-radius: 6px;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.7rem;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-weight: 600;
+      color: var(--text-tertiary);
+    }
+
+    /* Search History Dropdown */
+    .search-dropdown {
+      position: absolute;
+      top: calc(100% + 0.5rem);
+      left: 0;
+      right: 0;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      max-height: 280px;
+      overflow-y: auto;
+      z-index: 50;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition: all var(--transition-fast);
+    }
+
+    .search-dropdown.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .dropdown-header {
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border-primary);
+    }
+
+    .dropdown-item {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .dropdown-item:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .dropdown-item i {
+      color: var(--text-tertiary);
+      font-size: 0.875rem;
+      width: 1rem;
+      text-align: center;
+    }
+
+    .dropdown-item-text {
+      flex: 1;
+    }
+
+    .dropdown-item-remove {
+      opacity: 0;
+      color: var(--text-tertiary);
+      transition: all var(--transition-fast);
+      padding: 0.25rem;
+      border-radius: 4px;
+    }
+
+    .dropdown-item:hover .dropdown-item-remove {
+      opacity: 1;
+    }
+
+    .dropdown-item-remove:hover {
+      color: var(--accent-error);
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    /* Stats Panel */
+    .stats-panel {
+      display: none;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stats-panel.visible {
+      display: grid;
+    }
+
+    .stat-card {
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      text-align: center;
+      transition: all var(--transition-fast);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+    }
+
+    .stat-label {
+      font-size: 0.6875rem;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+      margin-top: 0.25rem;
+    }
+
+    /* Filters */
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .filter-label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .filter-label i {
+      font-size: 0.75rem;
+      color: var(--accent-primary);
+    }
+
+    .select-wrapper {
+      position: relative;
+    }
+
+    .select-wrapper select {
+      width: 100%;
+      padding: 0.75rem 2.5rem 0.75rem 1rem;
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-md);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      font-family: inherit;
+      font-weight: 500;
+      transition: all var(--transition-fast);
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .select-wrapper select:hover {
+      border-color: var(--border-secondary);
+    }
+
+    .select-wrapper select:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .select-wrapper::after {
+      content: '\f078';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-tertiary);
+      pointer-events: none;
+      font-size: 0.75rem;
+      transition: color var(--transition-fast);
+    }
+
+    .select-wrapper:hover::after {
+      color: var(--text-secondary);
+    }
+
+    /* Search Footer */
+    .search-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border-primary);
+    }
+
+    .results-info {
+      font-size: 0.875rem;
+      color: var(--text-tertiary);
+      font-weight: 500;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1rem;
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      border: none;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-primary);
+    }
+
+    .btn-ghost:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border-color: var(--border-secondary);
+    }
+
+    .btn-ghost i {
+      font-size: 0.75rem;
+    }
+
+    /* Results Section */
+    .results-section {
+      flex: 1;
+    }
+
+    .results-header {
+      padding: 1.25rem 1.5rem;
+      background: var(--bg-tertiary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-primary);
+    }
+
+    .results-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+    }
+
+    .results-title i {
+      color: var(--accent-primary);
+    }
+
+    .results-badge {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      background: var(--bg-secondary);
+      padding: 0.375rem 0.75rem;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+      border: 1px solid var(--border-primary);
+    }
+
+    .results-container {
+      max-height: 65vh;
+      overflow-y: auto;
+      padding: 1rem;
+      scroll-behavior: smooth;
+    }
+
+    .results-container::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .results-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .results-container::-webkit-scrollbar-thumb {
+      background: var(--border-primary);
+      border-radius: 4px;
+    }
+
+    .results-container::-webkit-scrollbar-thumb:hover {
+      background: var(--border-secondary);
+    }
+
+    /* Result Item */
+    .result-item {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 0.75rem;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      position: relative;
+      contain: content;
+    }
+
+    .result-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--accent-gradient);
+      border-radius: 3px 0 0 3px;
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+    }
+
+    .result-item:hover,
+    .result-item.selected {
+      border-color: var(--accent-primary);
+      box-shadow: var(--shadow-md), 0 0 0 1px rgba(59, 130, 246, 0.1);
+      transform: translateX(4px);
+    }
+
+    .result-item:hover::before,
+    .result-item.selected::before {
+      opacity: 1;
+    }
+
+    .result-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .result-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.625rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--accent-success);
+    }
+
+    .result-name {
+      font-size: 1.0625rem;
+      font-weight: 600;
+      color: var(--text-accent);
+      letter-spacing: -0.01em;
+    }
+
+    .result-class {
+      margin-left: auto;
+      font-size: 0.8125rem;
+      color: var(--text-tertiary);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+    }
+
+    .result-class i {
+      font-size: 0.75rem;
+      color: var(--accent-primary);
+    }
+
+    .result-signature {
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      background: var(--bg-tertiary);
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-md);
+      margin-bottom: 0.75rem;
+      overflow-x: auto;
+      border: 1px solid var(--border-primary);
+      line-height: 1.5;
+    }
+
+    .result-signature::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    .result-signature::-webkit-scrollbar-thumb {
+      background: var(--border-primary);
+      border-radius: 2px;
+    }
+
+    .result-description {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      line-height: 1.6;
+      margin-bottom: 0.75rem;
+    }
+
+    .result-package {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .result-package i {
+      color: var(--accent-secondary);
+    }
+
+    .highlight {
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--accent-primary);
+      padding: 0.125rem 0.25rem;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    /* Loading State */
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+
+    .loading-spinner {
+      width: 3rem;
+      height: 3rem;
+      border: 3px solid var(--border-primary);
+      border-top-color: var(--accent-primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 1.25rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.375rem;
+    }
+
+    .loading-text {
+      font-size: 0.875rem;
+      color: var(--text-tertiary);
+      margin-bottom: 1rem;
+    }
+
+    .progress-bar {
+      width: 200px;
+      height: 4px;
+      background: var(--border-primary);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent-gradient);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Empty State */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+
+    .empty-icon {
+      width: 4rem;
+      height: 4rem;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+      font-size: 1.5rem;
+      color: var(--text-tertiary);
+    }
+
+    .empty-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.375rem;
+    }
+
+    .empty-text {
+      font-size: 0.875rem;
+      color: var(--text-tertiary);
+    }
+
+    /* Floating Elements */
+    .fab {
+      position: fixed;
+      bottom: 2rem;
+      left: 2rem;
+      width: 3rem;
+      height: 3rem;
+      border-radius: var(--radius-full);
+      background: var(--accent-gradient);
+      color: white;
+      border: none;
+      box-shadow: var(--shadow-lg), 0 4px 16px rgba(59, 130, 246, 0.4);
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition-fast);
+      z-index: 50;
+      font-size: 1rem;
+    }
+
+    .fab.visible {
+      display: flex;
+    }
+
+    .fab:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-xl), 0 8px 24px rgba(59, 130, 246, 0.5);
+    }
+
+    .fab:active {
+      transform: translateY(-1px);
+    }
+
+    /* Keyboard Hints */
+    .keyboard-hints {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(0.5rem);
+      transition: all var(--transition-fast);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .keyboard-hints.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(120%);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.25rem;
+      box-shadow: var(--shadow-xl);
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      max-width: 400px;
+      opacity: 0;
+      transition: all var(--transition-slow);
+      z-index: 200;
+    }
+
+    .toast.visible {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast-icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .toast.success .toast-icon { color: var(--accent-success); }
+    .toast.error .toast-icon { color: var(--accent-error); }
+    .toast.info .toast-icon { color: var(--accent-primary); }
+
+    .toast-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .toast-title {
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--text-primary);
+      margin-bottom: 0.125rem;
+    }
+
+    .toast-message {
+      font-size: 0.8125rem;
+      color: var(--text-tertiary);
+    }
+
+    .toast-close {
+      color: var(--text-tertiary);
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 4px;
+      transition: all var(--transition-fast);
+      flex-shrink: 0;
+    }
+
+    .toast-close:hover {
+      color: var(--text-primary);
+      background: var(--bg-tertiary);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+        gap: 1rem;
+      }
+
+      .header-content {
+        padding: 0.875rem 1rem;
+      }
+
+      .logo-text {
+        font-size: 1.125rem;
+      }
+
+      .logo-subtitle {
+        display: none;
+      }
+
+      .search-section {
+        padding: 1.5rem;
+      }
+
+      .stats-panel {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .filters {
+        grid-template-columns: 1fr;
+      }
+
+      .search-footer {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+      }
+
+      .results-info {
+        text-align: center;
+      }
+
+      .btn-ghost {
+        justify-content: center;
+      }
+
+      .result-item {
+        padding: 1rem;
+      }
+
+      .result-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+
+      .result-class {
+        margin-left: 0;
+      }
+
+      .keyboard-hints {
+        display: none;
+      }
+
+      .search-kbd {
+        display: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stat-card {
+        padding: 0.75rem;
+      }
+
+      .stat-value {
+        font-size: 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Ambient Background -->
+  <div class="ambient-bg">
+    <div class="ambient-orb"></div>
+    <div class="ambient-orb"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <a href="#" class="logo">
+        <div class="logo-icon">J</div>
+        <div class="logo-text-container">
+          <span class="logo-text">JavaDoc Explorer</span>
+          <span class="logo-subtitle">Advanced Method Search</span>
+        </div>
+      </a>
+      <div class="header-actions">
+        <button class="icon-btn" id="theme-toggle" title="Toggle theme (Ctrl+D)">
+          <i class="fas fa-moon" id="theme-icon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    <!-- Search Section -->
+    <section class="card search-section">
+      <div class="search-header">
+        <h1 class="search-title">
+          <i class="fas fa-search"></i>
+          Search Methods
+        </h1>
+        <p class="search-description">Find methods across your JavaDoc documentation with powerful filters</p>
+      </div>
+
+      <!-- Search Input -->
+      <div class="search-bar">
+        <div class="search-input-wrapper">
+          <input 
+            type="text" 
+            class="search-input" 
+            id="search-input"
+            placeholder="Search for methods... (e.g., getText, setVisible)"
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <i class="fas fa-search search-icon"></i>
+          <div class="search-kbd">
+            <span class="kbd">⌘</span>
+            <span class="kbd">K</span>
+          </div>
+        </div>
+        <div class="search-dropdown" id="search-history">
+          <div class="dropdown-header">Recent Searches</div>
+        </div>
+      </div>
+
+      <!-- Stats Panel -->
+      <div class="stats-panel" id="stats-panel">
+        <div class="stat-card">
+          <div class="stat-value" id="total-methods">0</div>
+          <div class="stat-label">Methods</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="total-classes">0</div>
+          <div class="stat-label">Classes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="total-packages">0</div>
+          <div class="stat-label">Packages</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="search-time">0ms</div>
+          <div class="stat-label">Search Time</div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters">
+        <div class="filter-group">
+          <label class="filter-label" for="package-filter">
+            <i class="fas fa-folder"></i>
+            Package
+          </label>
+          <div class="select-wrapper">
+            <select id="package-filter">
+              <option value="">All Packages</option>
+            </select>
+          </div>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label" for="class-filter">
+            <i class="fas fa-cube"></i>
+            Class
+          </label>
+          <div class="select-wrapper">
+            <select id="class-filter">
+              <option value="">All Classes</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="search-footer">
+        <span class="results-info" id="results-info">Ready to search</span>
+        <button class="btn btn-ghost" id="clear-filters">
+          <i class="fas fa-times"></i>
+          Clear Filters
+        </button>
+      </div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="card results-section">
+      <div class="results-header">
+        <h2 class="results-title">
+          <i class="fas fa-list"></i>
+          Method Results
+        </h2>
+        <span class="results-badge" id="results-count">0 methods</span>
+      </div>
+      <div class="results-container" id="results-container">
+        <div class="loading-state" id="loading-state">
+          <div class="loading-spinner"></div>
+          <div class="loading-title">Loading Documentation</div>
+          <div class="loading-text" id="loading-progress">Initializing...</div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Floating Action Button -->
+  <button class="fab" id="scroll-top" title="Scroll to top">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <!-- Keyboard Hints -->
+  <div class="keyboard-hints" id="keyboard-hints">
+    <span class="kbd">↑</span><span class="kbd">↓</span> Navigate
+    <span class="kbd">Enter</span> Open
+    <span class="kbd">Esc</span> Clear
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <i class="fas fa-check-circle toast-icon"></i>
+    <div class="toast-content">
+      <div class="toast-title"></div>
+      <div class="toast-message"></div>
+    </div>
+    <i class="fas fa-times toast-close"></i>
+  </div>
+
+  <script>
+    class JavaDocExplorer {
+      constructor() {
+        this.data = [];
+        this.filteredData = [];
+        this.selectedIndex = -1;
+        this.isLoading = true;
+        this.searchHistory = this.loadSearchHistory();
+        
+        this.cacheElements();
+        this.init();
+      }
+
+      cacheElements() {
+        this.elements = {
+          searchInput: document.getElementById('search-input'),
+          packageFilter: document.getElementById('package-filter'),
+          classFilter: document.getElementById('class-filter'),
+          resultsContainer: document.getElementById('results-container'),
+          resultsCount: document.getElementById('results-count'),
+          resultsInfo: document.getElementById('results-info'),
+          clearFiltersBtn: document.getElementById('clear-filters'),
+          keyboardHints: document.getElementById('keyboard-hints'),
+          loadingProgress: document.getElementById('loading-progress'),
+          progressFill: document.getElementById('progress-fill'),
+          loadingState: document.getElementById('loading-state'),
+          searchHistoryEl: document.getElementById('search-history'),
+          statsPanel: document.getElementById('stats-panel'),
+          totalMethods: document.getElementById('total-methods'),
+          totalClasses: document.getElementById('total-classes'),
+          totalPackages: document.getElementById('total-packages'),
+          searchTime: document.getElementById('search-time'),
+          scrollTopBtn: document.getElementById('scroll-top'),
+          toast: document.getElementById('toast'),
+          themeIcon: document.getElementById('theme-icon'),
+          themeToggle: document.getElementById('theme-toggle')
+        };
+      }
+
+      loadSearchHistory() {
+        try {
+          return JSON.parse(localStorage.getItem('javadoc-search-history') || '[]');
+        } catch {
+          return [];
+        }
+      }
+
+      async init() {
+        this.setupTheme();
+        this.setupEventListeners();
+        this.setupScrollButton();
+        this.renderSearchHistory();
+        await this.loadData();
+        this.populateFilters();
+        this.isLoading = false;
+      }
+
+      setupEventListeners() {
+        const { searchInput, packageFilter, classFilter, clearFiltersBtn, searchHistoryEl } = this.elements;
+
+        // Debounced search
+        let searchTimeout;
+        searchInput.addEventListener('input', () => {
+          clearTimeout(searchTimeout);
+          searchTimeout = setTimeout(() => this.applyFilters(), 150);
+        });
+
+        // Filters
+        packageFilter.addEventListener('change', () => this.onPackageChange());
+        classFilter.addEventListener('change', () => this.applyFilters());
+
+        // Clear filters
+        clearFiltersBtn.addEventListener('click', () => this.clearAllFilters());
+
+        // Keyboard navigation
+        searchInput.addEventListener('keydown', (e) => this.handleKeyNavigation(e));
+        document.addEventListener('keydown', (e) => this.handleGlobalKeys(e));
+
+        // Focus effects
+        searchInput.addEventListener('focus', () => {
+          this.elements.keyboardHints.classList.add('visible');
+          if (!searchInput.value.trim() && this.searchHistory.length > 0) {
+            searchHistoryEl.classList.add('active');
+          }
+        });
+
+        searchInput.addEventListener('blur', () => {
+          setTimeout(() => {
+            this.elements.keyboardHints.classList.remove('visible');
+            searchHistoryEl.classList.remove('active');
+          }, 200);
+        });
+
+        // Search history
+        searchInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && searchInput.value.trim()) {
+            this.addToSearchHistory(searchInput.value.trim());
+            searchHistoryEl.classList.remove('active');
+          }
+        });
+
+        // Toast close
+        this.elements.toast.querySelector('.toast-close').addEventListener('click', () => {
+          this.hideToast();
+        });
+      }
+
+      setupTheme() {
+        const savedTheme = localStorage.getItem('javadoc-theme') || 'light';
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const isDark = savedTheme === 'dark' || (savedTheme === 'system' && prefersDark);
+
+        if (isDark) {
+          document.body.classList.add('dark');
+          this.elements.themeIcon.className = 'fas fa-sun';
+        }
+
+        this.elements.themeToggle.addEventListener('click', () => {
+          const isDarkNow = document.body.classList.toggle('dark');
+          localStorage.setItem('javadoc-theme', isDarkNow ? 'dark' : 'light');
+          this.elements.themeIcon.className = isDarkNow ? 'fas fa-sun' : 'fas fa-moon';
+        });
+      }
+
+      setupScrollButton() {
+        const { scrollTopBtn } = this.elements;
+
+        scrollTopBtn.addEventListener('click', () => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+          clearTimeout(scrollTimeout);
+          scrollTimeout = setTimeout(() => {
+            scrollTopBtn.classList.toggle('visible', window.pageYOffset > 400);
+          }, 50);
+        }, { passive: true });
+      }
+
+      showToast(type, title, message) {
+        const { toast } = this.elements;
+        const icon = toast.querySelector('.toast-icon');
+        const titleEl = toast.querySelector('.toast-title');
+        const messageEl = toast.querySelector('.toast-message');
+
+        toast.className = `toast ${type}`;
+        icon.className = `fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} toast-icon`;
+        titleEl.textContent = title;
+        messageEl.textContent = message;
+
+        toast.classList.add('visible');
+        setTimeout(() => this.hideToast(), 4000);
+      }
+
+      hideToast() {
+        this.elements.toast.classList.remove('visible');
+      }
+
+      renderSearchHistory() {
+        const { searchHistoryEl } = this.elements;
+        
+        if (this.searchHistory.length === 0) {
+          searchHistoryEl.innerHTML = `
+            <div class="dropdown-header">Recent Searches</div>
+            <div class="dropdown-item" style="color: var(--text-tertiary); cursor: default;">
+              <i class="fas fa-clock"></i>
+              <span>No recent searches</span>
+            </div>
+          `;
+          return;
+        }
+
+        let html = '<div class="dropdown-header">Recent Searches</div>';
+        this.searchHistory.slice(-5).reverse().forEach((term, index) => {
+          html += `
+            <div class="dropdown-item" data-term="${term}" data-index="${index}">
+              <i class="fas fa-clock"></i>
+              <span class="dropdown-item-text">${this.escapeHtml(term)}</span>
+              <i class="fas fa-times dropdown-item-remove" data-remove="${index}"></i>
+            </div>
+          `;
+        });
+
+        searchHistoryEl.innerHTML = html;
+
+        // Event delegation for history items
+        searchHistoryEl.querySelectorAll('.dropdown-item[data-term]').forEach(item => {
+          item.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('dropdown-item-remove')) {
+              this.elements.searchInput.value = item.dataset.term;
+              this.applyFilters();
+              searchHistoryEl.classList.remove('active');
+            }
+          });
+        });
+
+        searchHistoryEl.querySelectorAll('.dropdown-item-remove').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const actualIndex = this.searchHistory.length - 1 - parseInt(btn.dataset.remove);
+            this.searchHistory.splice(actualIndex, 1);
+            localStorage.setItem('javadoc-search-history', JSON.stringify(this.searchHistory));
+            this.renderSearchHistory();
+          });
+        });
+      }
+
+      escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      addToSearchHistory(term) {
+        const existingIndex = this.searchHistory.indexOf(term);
+        if (existingIndex !== -1) {
+          this.searchHistory.splice(existingIndex, 1);
+        }
+        this.searchHistory.push(term);
+        if (this.searchHistory.length > 10) {
+          this.searchHistory.shift();
+        }
+        localStorage.setItem('javadoc-search-history', JSON.stringify(this.searchHistory));
+        this.renderSearchHistory();
+      }
+
+      async loadData() {
+        try {
+          this.updateLoadingStatus('Scanning documentation...', 0);
+
+          const files = this.getJavaDocFiles();
+          let processed = 0;
+          let successful = 0;
+
+          this.updateLoadingStatus(`Found ${files.length} files`, 5);
+
+          const batchSize = 8;
+          for (let i = 0; i < files.length; i += batchSize) {
+            const batch = files.slice(i, i + batchSize);
+            
+            await Promise.all(batch.map(async (file) => {
+              try {
+                const response = await fetch(file.path);
+                if (response.ok) {
+                  const html = await response.text();
+                  const doc = new DOMParser().parseFromString(html, 'text/html');
+                  const classData = this.parseClassFile(doc, file);
+                  if (classData.length > 0) {
+                    this.data.push(...classData);
+                    successful++;
+                  }
+                }
+              } catch (err) {
+                console.warn(`Failed: ${file.path}`);
+              }
+              processed++;
+              this.updateLoadingStatus(`Loading ${file.className}...`, 5 + (processed / files.length) * 90);
+            }));
+          }
+
+          this.data.sort((a, b) => a.name.localeCompare(b.name));
+          this.filteredData = [...this.data];
+          this.updateStats();
+
+          setTimeout(() => {
+            this.renderResults();
+            this.updateResultsInfo();
+            if (this.data.length > 0) {
+              this.showToast('success', 'Documentation Loaded', `${this.data.length} methods from ${successful} classes`);
+            }
+          }, 300);
+
+        } catch (error) {
+          console.error('Load failed:', error);
+          this.showError('Failed to load documentation');
+        }
+      }
+
+      updateStats() {
+        const packages = new Set(this.data.map(item => item.package));
+        const classes = new Set(this.data.map(item => item.className));
+
+        this.elements.totalMethods.textContent = this.data.length.toLocaleString();
+        this.elements.totalClasses.textContent = classes.size.toLocaleString();
+        this.elements.totalPackages.textContent = packages.size.toLocaleString();
+        this.elements.statsPanel.classList.add('visible');
+      }
+
+      updateLoadingStatus(message, percentage) {
+        this.elements.loadingProgress.textContent = message;
+        this.elements.progressFill.style.width = `${Math.min(percentage, 100)}%`;
+        this.elements.resultsInfo.textContent = `${message} (${Math.round(percentage)}%)`;
+      }
+
+      getJavaDocFiles() {
+        const classNames = {
+          'com/intellinum/mia/app/action': ['Action', 'ActionType', 'ClientAction', 'DumpSql'],
+          'com/intellinum/mia/app/device': ['DeviceInfo', 'DeviceType'],
+          'com/intellinum/mia/app/event': ['ApplicationEventListener', 'ButtonEventListener', 'CheckBoxEventListener', 'ComboEventListener', 'ComponentEventListener', 'ContainerEventListener', 'Event', 'EventListener', 'ListItemEventListener', 'LOVEventListener', 'PageEventListener', 'PreventDefaultException', 'TableSelectionEventListener', 'TextInputEventListener'],
+          'com/intellinum/mia/app': ['FlexiObject'],
+          'com/intellinum/mia/app/logfire/logical': ['LogFireJSONObject'],
+          'com/intellinum/mia/app/logfire/logical/util': ['WMSCloudJSONObject', 'WMSCloudRFInterface'],
+          'com/intellinum/mia/app/pages': ['AboutPage', 'DeviceSelectionPage', 'DynamicApplication', 'DynamicPage', 'FlexiApplication', 'KillSessionPage', 'LoginPage', 'LOVPage', 'MenuPage', 'OrganizationValidationApplication', 'OrganizationValidationPage', 'PersonalizationAdminApplication', 'PersonalizationAdminPage', 'ResponsibilityPage'],
+          'com/intellinum/mia/app/pages/lov': ['LOVDatabase', 'LOVDataSource', 'LOVOracleWebService', 'LOVWebServiceNew'],
+          'com/intellinum/mia/app/runtime': ['QueryManager', 'Session'],
+          'com/intellinum/mia/app/ui': ['Application', 'AttachmentField', 'Block', 'Button', 'Chart', 'CheckBoxField', 'Combo', 'ComboItem', 'Component', 'Container', 'Div', 'Divider', 'Field', 'Fieldset', 'FlexiObjectFactory', 'FlexiUIObject', 'GPSField', 'Grid', 'Image', 'InputField', 'KPI', 'Label', 'List', 'ListBox', 'ListItem', 'LOVField', 'MenuItem', 'Page', 'RadioButtonField', 'RadioButtonGroup', 'SideMenu', 'SQLTableDataSource', 'Table', 'TableColumn', 'TableDataSource', 'TableRow', 'TextArea', 'TextInputField'],
+          'com/intellinum/mia/app/ui/logical': ['FlexiAsyncTask', 'FlexiLogicalObject', 'FlexiWebService', 'VoiceMacro'],
+          'com/intellinum/mia/app/util': ['FlexiAPI', 'FlexiCredential', 'FlexiSoundMessageMap', 'FlexiUtil', 'JavaInterpreter', 'JavaMail', 'JavaScriptInterpreter', 'LicenseValidator', 'Md5Encryption', 'PlSqlIntepreter', 'PlSqlParam', 'ProfileLevel', 'SftpFileTransfer', 'SftpFileTransfer2', 'TableResult', 'TokenGenerator', 'WebServiceUtil', 'WebSoap'],
+          'com/intellinum/mia/app/util/converter': ['Converter', 'JSONConverter', 'JSONConverter2', 'PathRelationship', 'XMLConverter'],
+          'com/intellinum/mia/app/util/license': ['AesEncryptor', 'LicenseValidator', 'RegisteredUserLicenseManager'],
+          'com/intellinum/mia/app/util/log': ['DebugLog', 'Log'],
+          'com/intellinum/mia/app/util/patch': ['DatabasePatch'],
+          'com/intellinum/mia/app/util/scan': ['BarcodeComponent', 'BarcodeManager', 'BarcodeType'],
+          'com/intellinum/mia/app/util/statistic': ['BenchmarkData', 'MemoryUsage', 'Statistic'],
+          'com/intellinum/mia/app/util/tools': ['LogAnalysis', 'LogFirePatternConsolidator'],
+          'com/intellinum/mia/app/util/tools/files': ['FlexiZip', 'PDFCreator'],
+          'com/intellinum/mia/app/util/translation': ['GlobalTranslation', 'PageTranslation', 'TranslationManager'],
+          'com/intellinum/mia/app/util/webservice': ['RestWebService', 'SoapWebService', 'WebService'],
+          'com/intellinum/mia/app/util/worker': ['FlexiBackgroundWorkerThread', 'FlexiTask', 'TaskState']
+        };
+
+        const files = [];
+        for (const pkg in classNames) {
+          for (const className of classNames[pkg]) {
+            files.push({
+              path: `${pkg}/${className}.html`,
+              package: pkg.replace(/\//g, '.'),
+              className
+            });
+          }
+        }
+        return files;
+      }
+
+      parseClassFile(doc, file) {
+        const items = [];
+        const selectors = [
+          '.methodSummary table tr',
+          '.methodSummary .memberSummary tr',
+          '.method-summary tr',
+          'table.methodSummary tr',
+          '.summary .method tr',
+          '.memberSummary tr'
+        ];
+
+        for (const selector of selectors) {
+          const rows = doc.querySelectorAll(selector);
+          rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length < 2) return;
+
+            let nameLink = null, nameCell = null, typeCell = null;
+
+            for (let i = 0; i < cells.length; i++) {
+              const links = cells[i].querySelectorAll('a');
+              for (const link of links) {
+                const linkText = link.textContent.trim();
+                if (linkText && linkText.length > 0 && 
+                    !['modifier', 'type', 'description'].some(k => linkText.toLowerCase().includes(k))) {
+                  nameLink = link;
+                  nameCell = cells[i];
+                  typeCell = cells[0];
+                  break;
+                }
+              }
+              if (nameLink) break;
+            }
+
+            if (!nameLink) return;
+
+            const memberName = nameLink.textContent.trim();
+            if (!memberName || memberName.length < 1) return;
+
+            const lowerName = memberName.toLowerCase();
+            if (['modifier', 'type', 'description', 'field', 'method'].some(k => lowerName.includes(k))) return;
+
+            const signature = this.extractSignature(nameCell, typeCell, memberName);
+            const description = this.extractDescription(row, memberName, file.className);
+            const memberUrl = this.resolveUrl(nameLink.getAttribute('href'), file.path);
+            const searchText = `${memberName} ${signature} ${description} ${file.className} ${file.package}`.toLowerCase();
+
+            items.push({
+              type: 'method',
+              name: memberName,
+              className: file.className,
+              package: file.package,
+              signature,
+              description,
+              url: memberUrl,
+              searchText
+            });
+          });
+        }
+
+        return items;
+      }
+
+      extractSignature(nameCell, typeCell, memberName) {
+        const codeElements = nameCell.querySelectorAll('code');
+        for (const code of codeElements) {
+          const text = this.cleanText(code.textContent);
+          if (text && text.includes(memberName)) return text;
+        }
+
+        const cellText = this.cleanText(nameCell.textContent);
+        if (cellText && cellText.includes(memberName)) return cellText;
+
+        if (typeCell) {
+          const typeText = this.cleanText(typeCell.textContent);
+          if (typeText && !typeText.toLowerCase().includes('modifier')) {
+            return `${typeText} ${memberName}`;
+          }
+        }
+
+        return `${memberName}()`;
+      }
+
+      extractDescription(row, memberName, className) {
+        const cells = row.querySelectorAll('td');
+
+        for (let i = cells.length - 1; i >= 0; i--) {
+          const text = this.cleanText(cells[i].textContent);
+          if (text && text.length > 10 && 
+              !text.toLowerCase().includes(memberName.toLowerCase()) &&
+              !['modifier', 'type'].some(k => text.toLowerCase().includes(k))) {
+            return text;
+          }
+        }
+
+        for (const selector of ['.description', '.block', '.summary']) {
+          const el = row.querySelector(selector);
+          if (el) {
+            const text = this.cleanText(el.textContent);
+            if (text && text.length > 5) return text;
+          }
+        }
+
+        return `${memberName} method of ${className}`;
+      }
+
+      cleanText(text) {
+        return text ? text.replace(/\s+/g, ' ').trim() : '';
+      }
+
+      resolveUrl(href, basePath) {
+        if (!href) return basePath;
+        if (href.startsWith('http')) return href;
+        const baseDir = basePath.substring(0, basePath.lastIndexOf('/'));
+        return href.startsWith('#') ? basePath + href : `${baseDir}/${href}`;
+      }
+
+      populateFilters() {
+        const packages = [...new Set(this.data.map(item => item.package))].sort();
+        this.elements.packageFilter.innerHTML = '<option value="">All Packages</option>';
+        packages.forEach(pkg => {
+          this.elements.packageFilter.innerHTML += `<option value="${pkg}">${pkg}</option>`;
+        });
+        this.updateClassFilter();
+      }
+
+      updateClassFilter() {
+        const selectedPackage = this.elements.packageFilter.value;
+        let classes = selectedPackage
+          ? [...new Set(this.data.filter(item => item.package === selectedPackage).map(item => item.className))]
+          : [...new Set(this.data.map(item => item.className))];
+        
+        classes.sort();
+        const currentValue = this.elements.classFilter.value;
+
+        this.elements.classFilter.innerHTML = '<option value="">All Classes</option>';
+        classes.forEach(cls => {
+          this.elements.classFilter.innerHTML += `<option value="${cls}">${cls}</option>`;
+        });
+
+        if (classes.includes(currentValue)) {
+          this.elements.classFilter.value = currentValue;
+        }
+      }
+
+      onPackageChange() {
+        this.updateClassFilter();
+        this.applyFilters();
+      }
+
+      applyFilters() {
+        if (this.isLoading || this.data.length === 0) return;
+
+        const startTime = performance.now();
+        const searchTerm = this.elements.searchInput.value.toLowerCase().trim();
+        const packageFilter = this.elements.packageFilter.value;
+        const classFilter = this.elements.classFilter.value;
+
+        this.filteredData = this.data.filter(item => {
+          if (packageFilter && item.package !== packageFilter) return false;
+          if (classFilter && item.className !== classFilter) return false;
+          if (searchTerm && !item.searchText.includes(searchTerm)) return false;
+          return true;
+        });
+
+        const endTime = performance.now();
+        this.elements.searchTime.textContent = `${Math.round(endTime - startTime)}ms`;
+
+        this.selectedIndex = -1;
+        this.renderResults();
+        this.updateResultsInfo();
+
+        // Toggle history dropdown
+        if (document.activeElement === this.elements.searchInput && !searchTerm && this.searchHistory.length > 0) {
+          this.elements.searchHistoryEl.classList.add('active');
+        } else {
+          this.elements.searchHistoryEl.classList.remove('active');
+        }
+      }
+
+      renderResults() {
+        if (this.filteredData.length === 0) {
+          this.showNoResults();
+          return;
+        }
+
+        const maxResults = 100;
+        const resultsToShow = this.filteredData.slice(0, maxResults);
+        const fragment = document.createDocumentFragment();
+
+        resultsToShow.forEach((item, index) => {
+          fragment.appendChild(this.createResultElement(item, index));
+        });
+
+        this.elements.resultsContainer.innerHTML = '';
+        this.elements.resultsContainer.appendChild(fragment);
+
+        if (this.filteredData.length > maxResults) {
+          const more = document.createElement('div');
+          more.className = 'result-item';
+          more.style.textAlign = 'center';
+          more.innerHTML = `
+            <div class="result-name" style="color: var(--text-secondary);">
+              + ${this.filteredData.length - maxResults} more results
+            </div>
+            <div class="result-description">Refine your search to see more</div>
+          `;
+          this.elements.resultsContainer.appendChild(more);
+        }
+      }
+
+      createResultElement(item, index) {
+        const element = document.createElement('div');
+        element.className = 'result-item';
+        element.dataset.index = index;
+
+        const searchTerm = this.elements.searchInput.value.trim();
+        const highlightedName = this.highlightText(item.name, searchTerm);
+        const highlightedSignature = this.highlightText(item.signature, searchTerm);
+
+        element.innerHTML = `
+          <div class="result-header">
+            <span class="result-badge">method</span>
+            <span class="result-name">${highlightedName}</span>
+            <span class="result-class">
+              <i class="fas fa-cube"></i>
+              ${item.className}
+            </span>
+          </div>
+          ${item.signature ? `<div class="result-signature">${highlightedSignature}</div>` : ''}
+          <div class="result-description">${this.highlightText(item.description, searchTerm)}</div>
+          <div class="result-package">
+            <i class="fas fa-folder"></i>
+            ${item.package}
+          </div>
+        `;
+
+        element.addEventListener('click', () => this.openResult(item));
+        element.addEventListener('mouseenter', () => this.setSelectedIndex(index));
+
+        return element;
+      }
+
+      highlightText(text, searchTerm) {
+        if (!searchTerm || !text) return text;
+        const escaped = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return text.replace(new RegExp(`(${escaped})`, 'gi'), '<span class="highlight">$1</span>');
+      }
+
+      showNoResults() {
+        this.elements.resultsContainer.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">
+              <i class="fas fa-search"></i>
+            </div>
+            <div class="empty-title">No methods found</div>
+            <div class="empty-text">Try adjusting your search terms or filters</div>
+          </div>
+        `;
+      }
+
+      showError(message) {
+        this.elements.resultsContainer.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon" style="color: var(--accent-error);">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="empty-title">Error Loading Documentation</div>
+            <div class="empty-text">${message}</div>
+          </div>
+        `;
+      }
+
+      updateResultsInfo() {
+        const total = this.data.length;
+        const filtered = this.filteredData.length;
+        this.elements.resultsCount.textContent = `${filtered} ${filtered === 1 ? 'method' : 'methods'}`;
+        this.elements.resultsInfo.textContent = filtered === total 
+          ? `Showing all ${total} methods` 
+          : `Showing ${filtered} of ${total} methods`;
+      }
+
+      clearAllFilters() {
+        this.elements.searchInput.value = '';
+        this.elements.packageFilter.value = '';
+        this.elements.classFilter.value = '';
+        this.updateClassFilter();
+        this.applyFilters();
+        this.elements.searchInput.focus();
+        this.showToast('info', 'Filters Cleared', 'All search filters have been reset');
+      }
+
+      handleKeyNavigation(e) {
+        const maxIndex = Math.min(this.filteredData.length - 1, 99);
+
+        switch (e.key) {
+          case 'ArrowDown':
+            e.preventDefault();
+            this.setSelectedIndex(Math.min(this.selectedIndex + 1, maxIndex));
+            break;
+          case 'ArrowUp':
+            e.preventDefault();
+            this.setSelectedIndex(Math.max(this.selectedIndex - 1, -1));
+            break;
+          case 'Enter':
+            e.preventDefault();
+            if (this.selectedIndex >= 0 && this.selectedIndex < this.filteredData.length) {
+              this.openResult(this.filteredData[this.selectedIndex]);
+            }
+            break;
+          case 'Escape':
+            this.setSelectedIndex(-1);
+            this.elements.searchHistoryEl.classList.remove('active');
+            break;
+        }
+      }
+
+      handleGlobalKeys(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+          e.preventDefault();
+          this.elements.searchInput.focus();
+          this.elements.searchInput.select();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+          e.preventDefault();
+          this.elements.themeToggle.click();
+        }
+      }
+
+      setSelectedIndex(index) {
+        const prev = this.elements.resultsContainer.querySelector('.result-item.selected');
+        if (prev) prev.classList.remove('selected');
+
+        this.selectedIndex = index;
+
+        if (index >= 0) {
+          const newSelected = this.elements.resultsContainer.querySelector(`[data-index="${index}"]`);
+          if (newSelected) {
+            newSelected.classList.add('selected');
+            newSelected.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          }
+        }
+      }
+
+      openResult(item) {
+        if (item.url) {
+          window.open(item.url, '_blank', 'noopener,noreferrer');
+        }
+      }
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => new JavaDocExplorer());
+  </script>
+</body>
+</html>

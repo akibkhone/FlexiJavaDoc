@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaDoc Explorer</title>
+    <style>
+        /* iOS Safari-inspired styling */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f2f2f7;
+            --border-color: rgba(0,0,0,0.12);
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --accent-color: #0a84ff;
+            --success-color: #34c759;
+            --font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #0b0b0d;
+                --bg-secondary: #1c1c1e;
+                --border-color: rgba(255,255,255,0.12);
+                --text-primary: #f5f5f7;
+                --text-secondary: #a1a1aa;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-system);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px 20px;
+        }
+
+        .navbar-title {
+            font-size: 34px;
+            font-weight: 700;
+            margin: 0;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .navbar.condensed .navbar-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        /* Search Bar */
+        .search-container {
+            position: relative;
+            margin: 16px 0;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            border: none;
+            border-radius: 20px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 16px;
+            font-family: var(--font-system);
+            outline: none;
+            transition: all 0.15s ease-in-out;
+        }
+
+        .search-bar:focus {
+            box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.3);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--text-secondary);
+        }
+
+        .clear-button {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 50%;
+            display: none;
+        }
+
+        .clear-button.visible {
+            display: block;
+        }
+
+        /* Filters */
+        .filters-container {
+            margin: 16px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .filter-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            font-family: var(--font-system);
+            font-size: 14px;
+            min-width: 120px;
+        }
+
+        .type-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .type-filter {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+        }
+
+        .type-filter.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        /* Status */
+        .status-bar {
+            padding: 8px 0;
+            font-size: 14px;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .loading-indicator {
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .loading-indicator.visible {
+            display: flex;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Results */
+        .results-container {
+            margin-top: 16px;
+        }
+
+        .result-item {
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.15s ease-in-out;
+        }
+
+        .result-item:hover {
+            background-color: var(--bg-secondary);
+            margin: 0 -20px;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .result-type {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-type.class { background-color: #e3f2fd; color: #1565c0; }
+        .result-type.interface { background-color: #f3e5f5; color: #7b1fa2; }
+        .result-type.enum { background-color: #e8f5e8; color: #2e7d32; }
+        .result-type.annotation { background-color: #fff3e0; color: #ef6c00; }
+        .result-type.constructor { background-color: #fce4ec; color: #c2185b; }
+        .result-type.method { background-color: #e1f5fe; color: #0277bd; }
+        .result-type.field { background-color: #f1f8e9; color: #558b2f; }
+        .result-type.enum-const { background-color: #e8f5e8; color: #388e3c; }
+
+        .result-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .result-badges {
+            display: flex;
+            gap: 4px;
+            margin-left: auto;
+        }
+
+        .badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            background-color: var(--bg-secondary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+        }
+
+        .badge:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .result-signature {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            background-color: var(--bg-secondary);
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin: 8px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.15s ease-in-out;
+        }
+
+        .copy-button:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .result-description {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .result-link {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .result-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--text-primary);
+            color: var(--bg-primary);
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            z-index: 1000;
+        }
+
+        .toast.visible {
+            opacity: 1;
+        }
+
+        /* No results */
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .no-results h3 {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .no-results p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        /* Error panel */
+        .error-panel {
+            background-color: #fee;
+            border: 1px solid #fcc;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 16px 0;
+            display: none;
+        }
+
+        .error-panel.visible {
+            display: block;
+        }
+
+        .error-title {
+            font-weight: 600;
+            color: #c53030;
+            margin: 0 0 8px 0;
+        }
+
+        .error-list {
+            font-size: 12px;
+            color: #744210;
+            margin: 0;
+            padding-left: 16px;
+        }
+
+        .dismiss-error {
+            float: right;
+            background: none;
+            border: none;
+            color: #c53030;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar-content {
+                padding: 12px 16px;
+            }
+
+            .filters-container {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .type-filters {
+                justify-content: center;
+            }
+
+            .result-item:hover {
+                margin: 0;
+                padding: 16px 0;
+            }
+        }
+
+        /* Keyboard hints */
+        .keyboard-hints {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            z-index: 100;
+        }
+
+        .keyboard-hints.visible {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .keyboard-hints {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="navbar-content">
+            <h1 class="navbar-title">JavaDoc</h1>
+            
+            <div class="search-container">
+                <svg class="search-icon" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                </svg>
+                <input type="text" class="search-bar" id="searchBar" placeholder="Search classes, methods, fields...">
+                <button class="clear-button" id="clearButton">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="filters-container">
+                <div class="filter-group">
+                    <label class="filter-label">Package</label>
+                    <select class="filter-select" id="packageFilter">
+                        <option value="">All Packages</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Class</label>
+                    <select class="filter-select" id="classFilter">
+                        <option value="">All Classes</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Name Contains</label>
+                    <input type="text" class="filter-select" id="nameFilter" placeholder="Filter by name...">
+                </div>
+            </div>
+
+            <div class="type-filters" id="typeFilters">
+                <button class="type-filter" data-type="class">Classes</button>
+                <button class="type-filter" data-type="interface">Interfaces</button>
+                <button class="type-filter" data-type="enum">Enums</button>
+                <button class="type-filter" data-type="annotation">Annotations</button>
+                <button class="type-filter" data-type="constructor">Constructors</button>
+                <button class="type-filter" data-type="method">Methods</button>
+                <button class="type-filter" data-type="field">Fields</button>
+                <button class="type-filter" data-type="enum-const">Enum Constants</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="navbar-content">
+        <div class="status-bar">
+            <span id="statusText">Loading...</span>
+            <div class="loading-indicator" id="loadingIndicator">
+                <div class="spinner"></div>
+                <span id="loadingText">Scanning files...</span>
+            </div>
+        </div>
+
+        <div class="error-panel" id="errorPanel">
+            <button class="dismiss-error" onclick="dismissError()">×</button>
+            <h4 class="error-title">Some files could not be loaded</h4>
+            <ul class="error-list" id="errorList"></ul>
+        </div>
+
+        <div class="results-container" id="resultsContainer">
+            <!-- Results will be populated here -->
+        </div>
+    </main>
+
+    <div class="toast" id="toast"></div>
+    
+    <div class="keyboard-hints" id="keyboardHints">
+        <div><kbd>Ctrl/Cmd+K</kbd> Focus search</div>
+        <div><kbd>Ctrl/Cmd+Shift+K</kbd> Clear filters</div>
+        <div><kbd>↑↓</kbd> Navigate • <kbd>Enter</kbd> Open • <kbd>Esc</kbd> Clear</div>
+    </div>
+
+    <script>
+        // Global state
+        let allItems = [];
+        let filteredItems = [];
+        let currentFilters = {
+            search: '',
+            package: '',
+            class: '',
+            name: '',
+            types: new Set()
+        };
+        let packages = new Set();
+        let classes = new Set();
+        let failedFiles = [];
+        let selectedIndex = -1;
+
+        // DOM elements
+        const searchBar = document.getElementById('searchBar');
+        const clearButton = document.getElementById('clearButton');
+        const packageFilter = document.getElementById('packageFilter');
+        const classFilter = document.getElementById('classFilter');
+        const nameFilter = document.getElementById('nameFilter');
+        const typeFilters = document.getElementById('typeFilters');
+        const statusText = document.getElementById('statusText');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const loadingText = document.getElementById('loadingText');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const errorPanel = document.getElementById('errorPanel');
+        const errorList = document.getElementById('errorList');
+        const toast = document.getElementById('toast');
+        const navbar = document.getElementById('navbar');
+        const keyboardHints = document.getElementById('keyboardHints');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupEventListeners();
+            showKeyboardHints();
+            await discoverAndParseFiles();
+        });
+
+        function setupEventListeners() {
+            // Search
+            searchBar.addEventListener('input', handleSearchInput);
+            clearButton.addEventListener('click', clearSearch);
+
+            // Filters
+            packageFilter.addEventListener('change', handlePackageFilter);
+            classFilter.addEventListener('change', handleClassFilter);
+            nameFilter.addEventListener('input', handleNameFilter);
+
+            // Type filters
+            typeFilters.addEventListener('click', handleTypeFilter);
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', handleKeyboard);
+
+            // Scroll behavior for navbar
+            let lastScrollY = window.scrollY;
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 100) {
+                    navbar.classList.add('condensed');
+                } else {
+                    navbar.classList.remove('condensed');
+                }
+                lastScrollY = window.scrollY;
+            });
+
+            // Auto-hide keyboard hints
+            setTimeout(() => {
+                keyboardHints.classList.remove('visible');
+            }, 5000);
+        }
+
+        function showKeyboardHints() {
+            if (window.innerWidth > 768) {
+                keyboardHints.classList.add('visible');
+            }
+        }
+
+        async function discoverAndParseFiles() {
+            loadingIndicator.classList.add('visible');
+            statusText.textContent = 'Discovering files...';
+
+            try {
+                const files = await discoverJavaDocFiles();
+                await parseFiles(files);
+                updateUI();
+                statusText.textContent = `Loaded ${allItems.length} items from ${files.length} files`;
+            } catch (error) {
+                console.error('Error during discovery and parsing:', error);
+                statusText.textContent = 'Error loading JavaDoc files';
+            } finally {
+                loadingIndicator.classList.remove('visible');
+            }
+        }
+
+        async function discoverJavaDocFiles() {
+            const files = new Set();
+            
+            // Strategy 1: Try to fetch allclasses-noframe.html
+            try {
+                const response = await fetch('./allclasses-noframe.html');
+                if (response.ok) {
+                    const html = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    
+                    const links = doc.querySelectorAll('a[href]');
+                    links.forEach(link => {
+                        const href = link.getAttribute('href');
+                        if (href && href.endsWith('.html') && !href.includes('#')) {
+                            files.add(href);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.log('Could not fetch allclasses-noframe.html, trying alternative methods');
+            }
+
+            // Strategy 2: Parse package summaries and index files
+            const commonFiles = [
+                'overview-summary.html',
+                'overview-tree.html',
+                'deprecated-list.html',
+                'index-all.html'
+            ];
+
+            for (const file of commonFiles) {
+                try {
+                    const response = await fetch(`./${file}`);
+                    if (response.ok) {
+                        const html = await response.text();
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        
+                        const links = doc.querySelectorAll('a[href]');
+                        links.forEach(link => {
+                            const href = link.getAttribute('href');
+                            if (href && href.endsWith('.html') && !href.includes('#') && 
+                                !href.includes('package-') && !href.includes('index-')) {
+                                files.add(href);
+                            }
+                        });
+                    }
+                } catch (e) {
+                    // Continue with other files
+                }
+            }
+
+            // Strategy 3: Try index files
+            for (let i = 1; i <= 26; i++) {
+                const indexFile = `index-files/index-${i}.html`;
+                try {
+                    const response = await fetch(`./${indexFile}`);
+                    if (response.ok) {
+                        const html = await response.text();
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        
+                        const links = doc.querySelectorAll('a[href]');
+                        links.forEach(link => {
+                            const href = link.getAttribute('href');
+                            if (href && href.includes('/') && href.endsWith('.html')) {
+                                const cleanHref = href.replace('../', '');
+                                if (!cleanHref.includes('#')) {
+                                    files.add(cleanHref);
+                                }
+                            }
+                        });
+                    }
+                } catch (e) {
+                    // File doesn't exist, continue
+                }
+            }
+
+            return Array.from(files).filter(file => 
+                !file.includes('package-summary') &&
+                !file.includes('package-frame') &&
+                !file.includes('package-tree') &&
+                !file.includes('overview-') &&
+                !file.includes('deprecated-') &&
+                !file.includes('help-') &&
+                !file.includes('index-') &&
+                file !== 'stylesheet.css' &&
+                file !== 'script.js'
+            );
+        }
+
+        async function parseFiles(files) {
+            const batchSize = 20;
+            let processed = 0;
+
+            for (let i = 0; i < files.length; i += batchSize) {
+                const batch = files.slice(i, i + batchSize);
+                const promises = batch.map(file => parseFile(file));
+                
+                await Promise.all(promises);
+                processed += batch.length;
+                
+                const percentage = Math.round((processed / files.length) * 100);
+                loadingText.textContent = `Parsing files... ${percentage}%`;
+                
+                // Allow UI to update
+                await new Promise(resolve => setTimeout(resolve, 10));
+            }
+        }
+
+        async function parseFile(filePath) {
+            try {
+                const response = await fetch(`./${filePath}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                const items = parseJavaDocPage(doc, filePath);
+                allItems.push(...items);
+                
+                // Update packages and classes sets
+                items.forEach(item => {
+                    if (item.package) packages.add(item.package);
+                    if (item.className) classes.add(item.className);
+                });
+                
+            } catch (error) {
+                console.warn(`Failed to parse ${filePath}:`, error);
+                failedFiles.push(filePath);
+            }
+        }
+
+        function parseJavaDocPage(doc, filePath) {
+            const items = [];
+            
+            // Extract package and class info from header
+            const packageName = extractPackageName(doc);
+            const classInfo = extractClassInfo(doc);
+            
+            if (!classInfo) return items;
+            
+            const { className, classType, classDescription } = classInfo;
+            
+            // Add the class itself
+            items.push({
+                type: classType,
+                name: className,
+                className: className,
+                package: packageName,
+                signature: `${classType} ${className}`,
+                description: classDescription,
+                url: filePath,
+                searchText: `${className} ${packageName} ${classDescription}`.toLowerCase()
+            });
+            
+            // Parse constructors
+            const constructors = parseConstructors(doc, className, filePath);
+            items.push(...constructors);
+            
+            // Parse methods
+            const methods = parseMethods(doc, className, filePath);
+            items.push(...methods);
+            
+            // Parse fields
+            const fields = parseFields(doc, className, filePath);
+            items.push(...fields);
+            
+            // Parse enum constants
+            if (classType === 'enum') {
+                const enumConstants = parseEnumConstants(doc, className, filePath);
+                items.push(...enumConstants);
+            }
+            
+            return items.map(item => ({
+                ...item,
+                package: packageName,
+                className: className
+            }));
+        }
+
+        function extractPackageName(doc) {
+            const packageElement = doc.querySelector('.header .subTitle, .subTitle');
+            if (packageElement) {
+                const text = packageElement.textContent.trim();
+                return text.replace('Package ', '').replace('package ', '');
+            }
+            
+            // Fallback: look for package in breadcrumb or title
+            const title = doc.title;
+            const match = title.match(/$$([^)]+)$$/);
+            return match ? match[1] : '';
+        }
+
+        function extractClassInfo(doc) {
+            const titleElement = doc.querySelector('.header h1, h1.title, .title');
+            if (!titleElement) return null;
+            
+            const titleText = titleElement.textContent.trim();
+            
+            // Determine class type and name
+            let classType = 'class';
+            let className = titleText;
+            
+            if (titleText.includes('Interface ')) {
+                classType = 'interface';
+                className = titleText.replace(/.*Interface\s+/, '');
+            } else if (titleText.includes('Enum ')) {
+                classType = 'enum';
+                className = titleText.replace(/.*Enum\s+/, '');
+            } else if (titleText.includes('Annotation ')) {
+                classType = 'annotation';
+                className = titleText.replace(/.*Annotation\s+/, '');
+            } else if (titleText.includes('Class ')) {
+                className = titleText.replace(/.*Class\s+/, '');
+            }
+            
+            // Extract description
+            const descElement = doc.querySelector('.description .block, .block');
+            const classDescription = descElement ? cleanText(descElement.textContent) : '';
+            
+            return { className, classType, classDescription };
+        }
+
+        function parseConstructors(doc, className, filePath) {
+            const constructors = [];
+            const constructorRows = doc.querySelectorAll('.constructorSummary tr, .memberSummary tr');
+            
+            constructorRows.forEach(row => {
+                const nameLink = row.querySelector('.memberNameLink, .colLast a');
+                if (!nameLink) return;
+                
+                const memberName = cleanText(nameLink.textContent);
+                
+                // Only treat as constructor if name matches class name
+                if (memberName !== className && !memberName.startsWith(className + '(')) return;
+                
+                const signature = extractSignature(row, 'constructor', className);
+                const description = extractDescription(row);
+                const anchor = nameLink.getAttribute('href') || `#${memberName}`;
+                
+                constructors.push({
+                    type: 'constructor',
+                    name: memberName,
+                    signature: signature,
+                    description: description,
+                    url: `${filePath}${anchor}`,
+                    searchText: `${memberName} ${signature} ${description}`.toLowerCase()
+                });
+            });
+            
+            return constructors;
+        }
+
+        function parseMethods(doc, className, filePath) {
+            const methods = [];
+            const methodRows = doc.querySelectorAll('.methodSummary tr, .memberSummary tr');
+            
+            methodRows.forEach(row => {
+                const nameLink = row.querySelector('.memberNameLink, .colLast a');
+                if (!nameLink) return;
+                
+                const memberName = cleanText(nameLink.textContent);
+                
+                // Skip if this is actually a constructor
+                if (memberName === className || memberName.startsWith(className + '(')) return;
+                
+                const signature = extractSignature(row, 'method', memberName);
+                const description = extractDescription(row);
+                const anchor = nameLink.getAttribute('href') || `#${memberName}`;
+                
+                methods.push({
+                    type: 'method',
+                    name: memberName,
+                    signature: signature,
+                    description: description,
+                    url: `${filePath}${anchor}`,
+                    searchText: `${memberName} ${signature} ${description}`.toLowerCase()
+                });
+            });
+            
+            return methods;
+        }
+
+        function parseFields(doc, className, filePath) {
+            const fields = [];
+            const fieldRows = doc.querySelectorAll('.fieldSummary tr, .constantsSummary tr');
+            
+            fieldRows.forEach(row => {
+                const nameLink = row.querySelector('.memberNameLink, .colLast a');
+                if (!nameLink) return;
+                
+                const memberName = cleanText(nameLink.textContent);
+                const signature = extractSignature(row, 'field', memberName);
+                const description = extractDescription(row);
+                const anchor = nameLink.getAttribute('href') || `#${memberName}`;
+                
+                fields.push({
+                    type: 'field',
+                    name: memberName,
+                    signature: signature,
+                    description: description,
+                    url: `${filePath}${anchor}`,
+                    searchText: `${memberName} ${signature} ${description}`.toLowerCase()
+                });
+            });
+            
+            return fields;
+        }
+
+        function parseEnumConstants(doc, className, filePath) {
+            const enumConstants = [];
+            const enumRows = doc.querySelectorAll('.constantsSummary tr, .memberSummary tr');
+            
+            enumRows.forEach(row => {
+                const nameLink = row.querySelector('.memberNameLink, .colLast a');
+                if (!nameLink) return;
+                
+                const memberName = cleanText(nameLink.textContent);
+                
+                // Check if this looks like an enum constant (usually all caps)
+                if (memberName === memberName.toUpperCase() || 
+                    row.closest('.constantsSummary')) {
+                    
+                    const description = extractDescription(row);
+                    const anchor = nameLink.getAttribute('href') || `#${memberName}`;
+                    
+                    enumConstants.push({
+                        type: 'enum-const',
+                        name: memberName,
+                        signature: memberName,
+                        description: description,
+                        url: `${filePath}${anchor}`,
+                        searchText: `${memberName} ${description}`.toLowerCase()
+                    });
+                }
+            });
+            
+            return enumConstants;
+        }
+
+        function extractSignature(row, type, memberName) {
+            const colFirst = row.querySelector('.colFirst');
+            const colLast = row.querySelector('.colLast');
+            
+            if (type === 'constructor') {
+                const params = extractParameters(colLast);
+                return `${memberName}(${params})`;
+            } else if (type === 'method') {
+                const returnType = colFirst ? cleanText(colFirst.textContent) : 'void';
+                const params = extractParameters(colLast);
+                return `${returnType} ${memberName}(${params})`;
+            } else if (type === 'field') {
+                const fieldType = colFirst ? cleanText(colFirst.textContent) : 'Object';
+                return `${fieldType} ${memberName}`;
+            }
+            
+            return memberName;
+        }
+
+        function extractParameters(element) {
+            if (!element) return '';
+            
+            const text = element.textContent;
+            const parenStart = text.indexOf('(');
+            const parenEnd = text.lastIndexOf(')');
+            
+            if (parenStart !== -1 && parenEnd !== -1) {
+                return text.substring(parenStart + 1, parenEnd).trim();
+            }
+            
+            return '';
+        }
+
+        function extractDescription(row) {
+            const descElement = row.querySelector('.colLast .block, .block');
+            return descElement ? cleanText(descElement.textContent) : '';
+        }
+
+        function cleanText(text) {
+            return text.replace(/\s+/g, ' ').trim();
+        }
+
+        function updateUI() {
+            updateFilterOptions();
+            applyFilters();
+            
+            if (failedFiles.length > 0) {
+                showErrorPanel();
+            }
+        }
+
+        function updateFilterOptions() {
+            // Update package filter
+            packageFilter.innerHTML = '<option value="">All Packages</option>';
+            Array.from(packages).sort().forEach(pkg => {
+                const option = document.createElement('option');
+                option.value = pkg;
+                option.textContent = pkg;
+                packageFilter.appendChild(option);
+            });
+            
+            // Update class filter
+            updateClassFilter();
+        }
+
+        function updateClassFilter() {
+            const selectedPackage = currentFilters.package;
+            const availableClasses = selectedPackage 
+                ? Array.from(classes).filter(cls => 
+                    allItems.some(item => item.className === cls && item.package === selectedPackage))
+                : Array.from(classes);
+            
+            classFilter.innerHTML = '<option value="">All Classes</option>';
+            availableClasses.sort().forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls;
+                option.textContent = cls;
+                classFilter.appendChild(option);
+            });
+        }
+
+        function applyFilters() {
+            filteredItems = allItems.filter(item => {
+                // Search filter
+                if (currentFilters.search && 
+                    !item.searchText.includes(currentFilters.search.toLowerCase())) {
+                    return false;
+                }
+                
+                // Package filter
+                if (currentFilters.package && item.package !== currentFilters.package) {
+                    return false;
+                }
+                
+                // Class filter
+                if (currentFilters.class && item.className !== currentFilters.class) {
+                    return false;
+                }
+                
+                // Name filter
+                if (currentFilters.name && 
+                    !item.name.toLowerCase().includes(currentFilters.name.toLowerCase())) {
+                    return false;
+                }
+                
+                // Type filter
+                if (currentFilters.types.size > 0 && !currentFilters.types.has(item.type)) {
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            // Sort results
+            filteredItems.sort((a, b) => {
+                // Classes first, then constructors, methods, fields, enum constants
+                const typeOrder = {
+                    'class': 0, 'interface': 1, 'enum': 2, 'annotation': 3,
+                    'constructor': 4, 'method': 5, 'field': 6, 'enum-const': 7
+                };
+                
+                const typeCompare = typeOrder[a.type] - typeOrder[b.type];
+                if (typeCompare !== 0) return typeCompare;
+                
+                // Then alphabetical by name
+                return a.name.localeCompare(b.name);
+            });
+            
+            renderResults();
+            updateStatus();
+        }
+
+        function renderResults() {
+            const maxResults = 300;
+            const resultsToShow = filteredItems.slice(0, maxResults);
+            const hasMore = filteredItems.length > maxResults;
+            
+            if (resultsToShow.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="no-results">
+                        <h3>No results found</h3>
+                        <p>Try adjusting your search terms or filters</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const fragment = document.createDocumentFragment();
+            
+            resultsToShow.forEach((item, index) => {
+                const resultElement = createResultElement(item, index);
+                fragment.appendChild(resultElement);
+            });
+            
+            if (hasMore) {
+                const moreElement = document.createElement('div');
+                moreElement.className = 'result-item';
+                moreElement.innerHTML = `
+                    <div class="result-header">
+                        <span class="result-name">+${filteredItems.length - maxResults} more results</span>
+                    </div>
+                    <div class="result-description">Refine your search or filters to see more specific results</div>
+                `;
+                fragment.appendChild(moreElement);
+            }
+            
+            resultsContainer.innerHTML = '';
+            resultsContainer.appendChild(fragment);
+        }
+
+        function createResultElement(item, index) {
+            const div = document.createElement('div');
+            div.className = 'result-item';
+            div.dataset.index = index;
+            
+            div.innerHTML = `
+                <div class="result-header">
+                    <span class="result-type ${item.type}">${item.type}</span>
+                    <span class="result-name">${item.name}</span>
+                    <div class="result-badges">
+                        ${item.package ? `<span class="badge" onclick="filterByPackage('${item.package}')">${item.package}</span>` : ''}
+                        ${item.className && item.type !== 'class' && item.type !== 'interface' && item.type !== 'enum' && item.type !== 'annotation' ? 
+                          `<span class="badge" onclick="filterByClass('${item.className}')">${item.className}</span>` : ''}
+                    </div>
+                </div>
+                <div class="result-signature">
+                    ${item.signature}
+                    <button class="copy-button" onclick="copySignature('${item.signature.replace(/'/g, "\\'")}')">
+                        <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+                            <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+                        </svg>
+                    </button>
+                </div>
+                ${item.description ? `<div class="result-description">${item.description}</div>` : ''}
+                <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="result-link">View Documentation →</a>
+            `;
+            
+            return div;
+        }
+
+        function updateStatus() {
+            const total = allItems.length;
+            const showing = Math.min(filteredItems.length, 300);
+            
+            if (filteredItems.length === 0) {
+                statusText.textContent = `No results found (${total} total items)`;
+            } else if (filteredItems.length <= 300) {
+                statusText.textContent = `Showing ${showing} of ${total} items`;
+            } else {
+                statusText.textContent = `Showing ${showing} of ${filteredItems.length} filtered items (${total} total)`;
+            }
+        }
+
+        function showErrorPanel() {
+            errorList.innerHTML = '';
+            failedFiles.forEach(file => {
+                const li = document.createElement('li');
+                li.textContent = file;
+                errorList.appendChild(li);
+            });
+            errorPanel.classList.add('visible');
+        }
+
+        function dismissError() {
+            errorPanel.classList.remove('visible');
+        }
+
+        // Event handlers
+        function handleSearchInput(e) {
+            currentFilters.search = e.target.value;
+            clearButton.classList.toggle('visible', e.target.value.length > 0);
+            applyFilters();
+        }
+
+        function clearSearch() {
+            searchBar.value = '';
+            currentFilters.search = '';
+            clearButton.classList.remove('visible');
+            applyFilters();
+        }
+
+        function handlePackageFilter(e) {
+            currentFilters.package = e.target.value;
+            updateClassFilter();
+            applyFilters();
+        }
+
+        function handleClassFilter(e) {
+            currentFilters.class = e.target.value;
+            applyFilters();
+        }
+
+        function handleNameFilter(e) {
+            currentFilters.name = e.target.value;
+            applyFilters();
+        }
+
+        function handleTypeFilter(e) {
+            if (e.target.classList.contains('type-filter')) {
+                const type = e.target.dataset.type;
+                
+                if (currentFilters.types.has(type)) {
+                    currentFilters.types.delete(type);
+                    e.target.classList.remove('active');
+                } else {
+                    currentFilters.types.add(type);
+                    e.target.classList.add('active');
+                }
+                
+                applyFilters();
+            }
+        }
+
+        function handleKeyboard(e) {
+            // Ctrl/Cmd + K: Focus search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k' && !e.shiftKey) {
+                e.preventDefault();
+                searchBar.focus();
+                return;
+            }
+            
+            // Ctrl/Cmd + Shift + K: Clear filters
+            if ((e.ctrlKey || e.metaKey) && e.key === 'K' && e.shiftKey) {
+                e.preventDefault();
+                clearAllFilters();
+                return;
+            }
+            
+            // Escape: Clear selection or search
+            if (e.key === 'Escape') {
+                if (document.activeElement === searchBar) {
+                    searchBar.blur();
+                } else {
+                    selectedIndex = -1;
+                    updateSelection();
+                }
+                return;
+            }
+            
+            // Arrow navigation in results
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                const maxIndex = Math.min(filteredItems.length - 1, 299);
+                
+                if (e.key === 'ArrowDown') {
+                    selectedIndex = selectedIndex < maxIndex ? selectedIndex + 1 : 0;
+                } else {
+                    selectedIndex = selectedIndex > 0 ? selectedIndex - 1 : maxIndex;
+                }
+                
+                updateSelection();
+                return;
+            }
+            
+            // Enter: Open selected result
+            if (e.key === 'Enter' && selectedIndex >= 0) {
+                const item = filteredItems[selectedIndex];
+                if (item) {
+                    window.open(item.url, '_blank', 'noopener,noreferrer');
+                }
+                return;
+            }
+        }
+
+        function updateSelection() {
+            const resultItems = resultsContainer.querySelectorAll('.result-item');
+            resultItems.forEach((item, index) => {
+                item.style.backgroundColor = index === selectedIndex ? 'var(--bg-secondary)' : '';
+            });
+            
+            if (selectedIndex >= 0 && resultItems[selectedIndex]) {
+                resultItems[selectedIndex].scrollIntoView({ block: 'nearest' });
+            }
+        }
+
+        function clearAllFilters() {
+            searchBar.value = '';
+            currentFilters.search = '';
+            currentFilters.package = '';
+            currentFilters.class = '';
+            currentFilters.name = '';
+            currentFilters.types.clear();
+            
+            packageFilter.value = '';
+            classFilter.value = '';
+            nameFilter.value = '';
+            
+            document.querySelectorAll('.type-filter.active').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            clearButton.classList.remove('visible');
+            updateClassFilter();
+            applyFilters();
+        }
+
+        // Utility functions
+        function filterByPackage(packageName) {
+            currentFilters.package = packageName;
+            packageFilter.value = packageName;
+            updateClassFilter();
+            applyFilters();
+        }
+
+        function filterByClass(className) {
+            currentFilters.class = className;
+            classFilter.value = className;
+            applyFilters();
+        }
+
+        function copySignature(signature) {
+            navigator.clipboard.writeText(signature).then(() => {
+                showToast('Copied to clipboard');
+            }).catch(() => {
+                showToast('Copy failed');
+            });
+        }
+
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('visible');
+            setTimeout(() => {
+                toast.classList.remove('visible');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
